@@ -89,18 +89,15 @@ public abstract class Component {
     }
 
     /**
-     * Absolute rectangle of this component in GUI space.
+     * Rectangle of this component in GUI space.
+     *
+     * <p>Layouts assign absolute coordinates to their children, so the stored
+     * position is already in GUI space and must not be offset by the parents
+     * again. Adding the parents here put hit testing above the rendered
+     * widget.</p>
      */
     public Rect bounds() {
-        float absX = x;
-        float absY = y;
-        Component current = parent;
-        while (current != null) {
-            absX += current.x;
-            absY += current.y;
-            current = current.parent;
-        }
-        return new Rect(absX, absY, width, height);
+        return new Rect(x, y, width, height);
     }
 
     public boolean isMouseOver(double mouseX, double mouseY) {

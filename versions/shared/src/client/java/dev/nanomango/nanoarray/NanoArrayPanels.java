@@ -15,7 +15,6 @@ import dev.nanomango.gui.components.Panel;
 import dev.nanomango.gui.components.ProgressBar;
 import dev.nanomango.gui.components.RadioGroup;
 import dev.nanomango.gui.components.SearchField;
-import dev.nanomango.gui.components.SearchableList;
 import dev.nanomango.gui.components.Separator;
 import dev.nanomango.gui.components.Slider;
 import dev.nanomango.gui.components.Tabs;
@@ -50,7 +49,9 @@ public final class NanoArrayPanels {
 
         tabs.addTab("General", generalPanel(gui));
         tabs.addTab("Appearance", appearancePanel(gui));
-        tabs.addTab("Modules", modulesPanel(gui));
+        // Kept as an empty tab. The module list was removed, the tab stays for
+        // projects that want to fill it themselves.
+        tabs.addTab("Modules", new Panel());
         tabs.addTab("About", aboutPanel(gui));
     }
 
@@ -151,20 +152,6 @@ public final class NanoArrayPanels {
         graph.maximumSamples(60);
         advanced.add(graph);
         panel.add(advanced);
-
-        return panel;
-    }
-
-    private static Component modulesPanel(Gui gui) {
-        Panel panel = new Panel("Modules");
-        panel.layout(new VerticalLayout(gui.themes().current().spacing()));
-
-        SearchableList list = new SearchableList();
-        list.addItem("Auto Tool", "auto-tool");
-        list.addItem("ESP", "esp");
-        list.addItem("Nametags", "nametags");
-        list.addItem("Waypoints", "waypoints");
-        panel.add(list);
 
         return panel;
     }

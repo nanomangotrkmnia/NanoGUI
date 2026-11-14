@@ -2,6 +2,7 @@ package dev.nanomango.gui.component;
 
 import dev.nanomango.gui.components.Button;
 import dev.nanomango.gui.components.Panel;
+import dev.nanomango.gui.components.Tabs;
 import dev.nanomango.gui.core.GuiContext;
 import dev.nanomango.gui.layout.VerticalLayout;
 import dev.nanomango.gui.test.TestSupport;
@@ -42,6 +43,36 @@ class ContainerInputTest {
         assertTrue(container.mouseClicked(50.0, 25.0, 0),
                 "the click must hit the button at its drawn position");
         container.mouseReleased(50.0, 25.0, 0);
+        assertEquals(1, clicks.get());
+    }
+
+    @Test
+    @DisplayName("a click inside a tab reaches the button at its drawn position")
+    void clickInsideTabbedPanel() {
+        GuiContext context = TestSupport.context();
+        AtomicInteger clicks = new AtomicInteger();
+
+        Tabs tabs = new Tabs();
+        Panel panel = new Panel("Title");
+        Button button = new Button("Press");
+        button.onClick(clicks::incrementAndGet);
+        panel.add(button);
+        tabs.addTab("Tab", panel);
+
+        tabs.setBounds(0.0F, 0.0F, 400.0F, 400.0F);
+        tabs.setContext(context);
+        tabs.update(context);
+        tabs.render(context);
+
+        // The panel draws its children below the title, so the click has to be
+        // made at that visual position.
+        float titleOffset = context.boldFont().height() + context.theme().spacing();
+        float clickX = button.bounds().x() + button.width() * 0.5F;
+        float clickY = button.bounds().y() + button.height() * 0.5F + titleOffset;
+
+        assertTrue(tabs.mouseClicked(clickX, clickY, 0),
+                "the click must reach the button drawn inside the panel");
+        tabs.mouseReleased(clickX, clickY, 0);
         assertEquals(1, clicks.get());
     }
 

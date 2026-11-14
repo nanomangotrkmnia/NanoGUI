@@ -37,6 +37,9 @@ public final class MinecraftRenderBackend implements RenderBackend {
     /** Resolves the numeric texture ids of the draw list. */
     private TextureResolver textureResolver;
 
+    /** Physical pixels per GUI unit of the current frame. */
+    private float pixelScale = 1.0F;
+
     public MinecraftRenderBackend(FontAtlasRegistry atlases, RoundedCornerAtlas corners) {
         this.atlases = atlases;
         this.rounded = new RoundedRectangles(corners);
@@ -73,6 +76,7 @@ public final class MinecraftRenderBackend implements RenderBackend {
             return;
         }
         this.fonts = fonts;
+        this.pixelScale = context.scale() > 0.0F ? context.scale() : 1.0F;
         int opCursor = 0;
         int floatCursor = 0;
         int intCursor = 0;
@@ -240,21 +244,15 @@ public final class MinecraftRenderBackend implements RenderBackend {
         int sourceWidth = Math.max(1, Math.round((u1 - u0) * textureWidth));
         int sourceHeight = Math.max(1, Math.round((v1 - v0) * textureHeight));
 
-        // Minecraft draws at integer positions. The atlas is rasterised at the
-        // physical resolution, so rounding a glyph to the nearest GUI pixel
-        // keeps it one to one on screen instead of stretching it.
-        int destinationX = Math.round(x);
-        int destinationY = Math.round(y);
-        int destinationWidth = Math.max(1, Math.round(width));
-        int destinationHeight = Math.max(1, Math.round(height));
-
-        // The atlas is rasterised at the physical resolution, so the source
-        // rectangle is larger than the GUI sized destination. The overload
-        // that takes both sizes has to be used; otherwise Minecraft samples
-        // only the top left part of the glyph.
+        // The glyph is drawn at its exact fractional position and scaled down
+        // by the inverse of the display density. That places every glyph on a
+        // physical pixel boundary without rounding its position or its size to
+        // whole GUI units, which would make the spacing uneven.
+        graphics.pushTransform(x, y, 1.0F / pixelScale);
         graphics.blit(atlas.identifier(), sourceX, sourceY,
-                destinationX, destinationY, destinationWidth, destinationHeight,
+                0, 0, sourceWidth, sourceHeight,
                 sourceWidth, sourceHeight, textureWidth, textureHeight, argb);
+        graphics.popTransform();
     }
 
     @Override

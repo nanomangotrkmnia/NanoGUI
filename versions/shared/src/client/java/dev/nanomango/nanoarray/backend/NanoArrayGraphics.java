@@ -62,6 +62,19 @@ public interface NanoArrayGraphics {
               int sourceWidth, int sourceHeight, int textureWidth, int textureHeight, int argb);
 
     /**
+     * Pushes a transform that translates by {@code (x, y)} and scales the
+     * coordinate system.
+     *
+     * <p>Used to place glyphs on physical pixel boundaries even though the GUI
+     * is laid out in larger units. Calls have to be balanced with
+     * {@link #popTransform()}.</p>
+     */
+    void pushTransform(float x, float y, float scale);
+
+    /** Pops the transform that was pushed by {@link #pushTransform}. */
+    void popTransform();
+
+    /**
      * Pushes a scissor rectangle. Calls have to be balanced with
      * {@link #disableScissor()}.
      */

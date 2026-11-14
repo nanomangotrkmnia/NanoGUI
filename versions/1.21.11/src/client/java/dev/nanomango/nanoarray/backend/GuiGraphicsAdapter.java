@@ -46,6 +46,18 @@ public final class GuiGraphicsAdapter implements NanoArrayGraphics {
     }
 
     @Override
+    public void pushTransform(float x, float y, float scale) {
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+    }
+
+    @Override
+    public void popTransform() {
+        graphics.pose().popMatrix();
+    }
+
+    @Override
     public void enableScissor(int x1, int y1, int x2, int y2) {
         graphics.enableScissor(x1, y1, x2, y2);
     }

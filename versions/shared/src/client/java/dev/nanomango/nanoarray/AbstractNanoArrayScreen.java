@@ -1,6 +1,7 @@
 package dev.nanomango.nanoarray;
 
 import dev.nanomango.nanoarray.backend.NanoArrayGraphics;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.client.input.KeyEvent;
@@ -93,7 +94,7 @@ public abstract class AbstractNanoArrayScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (core.gui().isOpen()) {
-            core.gui().mouseClicked(event.x(), event.y(), event.button());
+            core.gui().mouseClicked(cursorX(event), cursorY(event), event.button());
             // Clicks are always consumed so that they cannot reach the world.
             return true;
         }
@@ -103,7 +104,7 @@ public abstract class AbstractNanoArrayScreen extends Screen {
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
         if (core.gui().isOpen()) {
-            core.gui().mouseReleased(event.x(), event.y(), event.button());
+            core.gui().mouseReleased(cursorX(event), cursorY(event), event.button());
             return true;
         }
         return super.mouseReleased(event);
@@ -112,7 +113,7 @@ public abstract class AbstractNanoArrayScreen extends Screen {
     @Override
     public boolean mouseDragged(MouseButtonEvent event, double dragX, double dragY) {
         if (core.gui().isOpen()) {
-            return core.gui().mouseDragged(event.x(), event.y(), event.button(), dragX, dragY) || true;
+            return core.gui().mouseDragged(cursorX(event), cursorY(event), event.button(), dragX, dragY) || true;
         }
         return super.mouseDragged(event, dragX, dragY);
     }
@@ -120,9 +121,41 @@ public abstract class AbstractNanoArrayScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (core.gui().isOpen()) {
-            return core.gui().mouseScrolled(mouseX, mouseY, scrollX, scrollY) || true;
+            return core.gui().mouseScrolled(cursorX(mouseX), cursorY(mouseY), scrollX, scrollY) || true;
         }
         return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    /**
+     * Current cursor position in GUI units.
+     *
+     * <p>The event coordinates are not guaranteed to be in the same space as
+     * the coordinates used to lay out the frame, especially on Retina
+     * displays. Reading the scaled position from the mouse handler keeps hit
+     * testing aligned with what was drawn.</p>
+     */
+    private static double cursorX(MouseButtonEvent event) {
+        return cursorX(event.x());
+    }
+
+    private static double cursorY(MouseButtonEvent event) {
+        return cursorY(event.y());
+    }
+
+    private static double cursorX(double fallback) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft != null && minecraft.mouseHandler != null && minecraft.getWindow() != null) {
+            return minecraft.mouseHandler.getScaledXPos(minecraft.getWindow());
+        }
+        return fallback;
+    }
+
+    private static double cursorY(double fallback) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft != null && minecraft.mouseHandler != null && minecraft.getWindow() != null) {
+            return minecraft.mouseHandler.getScaledYPos(minecraft.getWindow());
+        }
+        return fallback;
     }
 
     @Override
