@@ -10,6 +10,10 @@ val lwjglVersion = providers.gradleProperty("minecraft.26_2.lwjgl").get()
 
 version = "${project.version}+mc${mcVersion}"
 
+base {
+    archivesName.set("nanoarray-$mcVersion")
+}
+
 loom {
     splitEnvironmentSourceSets()
 

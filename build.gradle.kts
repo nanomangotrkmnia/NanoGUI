@@ -19,7 +19,7 @@ subprojects {
  * Builds every supported Minecraft version in one invocation.
  *
  * `./gradlew buildAll` produces:
- *   versions/<mc>/build/libs/nanoarray-<mc>.jar
+ *   versions/<mc>/build/libs/nanoarray-<mc>-<version>.jar
  */
 tasks.register("buildAll") {
     group = "build"
