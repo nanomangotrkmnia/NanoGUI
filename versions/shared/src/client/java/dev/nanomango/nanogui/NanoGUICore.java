@@ -14,6 +14,8 @@ import dev.nanomango.nanogui.backend.RoundedCornerAtlas;
 import dev.nanomango.nanogui.font.MinecraftFont;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 
@@ -24,6 +26,8 @@ import java.nio.file.Path;
  * and the keybinds, and it translates between Minecraft and the framework.</p>
  */
 public final class NanoGUICore implements GuiHost {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger("nanogui");
 
     private static final NanoGUICore INSTANCE = new NanoGUICore();
 
@@ -151,6 +155,7 @@ public final class NanoGUICore implements GuiHost {
         // text sharp instead of upscaled.
         float rasterScale = Math.max(1.0F, Minecraft.getInstance().getWindow().getGuiScale());
         gui.pixelScale(rasterScale);
+        LOGGER.info("Rasterising the bundled fonts for GUI scale {}", rasterScale);
 
         try {
             Font regular = FontLoader.create(REGULAR_FONT_ID, "Inter",
@@ -262,6 +267,8 @@ public final class NanoGUICore implements GuiHost {
         if (scale == gui.pixelScale()) {
             return;
         }
+        LOGGER.info("GUI scale changed from {} to {}, rebuilding the font atlases",
+                gui.pixelScale(), scale);
         gui.pixelScale(scale);
         for (Font font : gui.fonts().all()) {
             font.setRasterScale(scale);
