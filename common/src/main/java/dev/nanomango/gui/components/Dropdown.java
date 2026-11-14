@@ -153,6 +153,11 @@ public class Dropdown extends Component {
     @Override
     public void render(GuiContext context) {
         layoutPopup(context);
+        if (open && context.overlay() != null && !context.overlay().components().contains(popup)) {
+            // Opening the GUI clears the overlay. Re-register the list so an
+            // open dropdown survives that, without ever adding the control.
+            context.overlay().add(popup);
+        }
         float radius = radius(context);
         context.draw().fillRounded(x(), y(), width(), height(), radius,
                 context.theme().surfaceVariant());

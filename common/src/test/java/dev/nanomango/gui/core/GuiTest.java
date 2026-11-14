@@ -2,6 +2,7 @@ package dev.nanomango.gui.core;
 
 import dev.nanomango.gui.component.Component;
 import dev.nanomango.gui.components.Button;
+import dev.nanomango.gui.components.Dropdown;
 import dev.nanomango.gui.components.Text;
 import dev.nanomango.gui.render.DrawList;
 import dev.nanomango.gui.render.RenderBackend;
@@ -147,6 +148,27 @@ class GuiTest {
         gui.mouseClicked(20, 20, 0);
         gui.mouseReleased(20, 20, 0);
         assertEquals(0, clicks.get());
+    }
+
+    @Test
+    @DisplayName("an open dropdown stays in the overlay across frames")
+    void dropdownSurvivesFrame() {
+        Dropdown dropdown = new Dropdown().options("A", "B");
+        gui.root().add(dropdown);
+        gui.open();
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        gui.mouseClicked(20, 20, 0);
+        gui.mouseReleased(20, 20, 0);
+        assertTrue(dropdown.isOpen());
+
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+        assertFalse(gui.overlay().isEmpty(),
+                "the popup must not be cleared at the start of the next frame");
+
+        float row = gui.context().theme().controlHeight();
+        gui.mouseClicked(20, dropdown.height() + 2 + row * 1.5F, 0);
+        assertEquals("B", dropdown.selected());
     }
 
     @Test

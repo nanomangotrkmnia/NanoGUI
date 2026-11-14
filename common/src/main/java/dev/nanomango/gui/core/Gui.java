@@ -237,7 +237,6 @@ public final class Gui {
         }
 
         drawList.clear();
-        overlay.clear();
 
         context.setTheme(themes.current());
         context.setDeltaSeconds(deltaSeconds);

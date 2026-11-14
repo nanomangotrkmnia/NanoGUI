@@ -70,12 +70,14 @@ public class NumberInput extends TextBox {
         float downY = upY + buttonSize + 2.0F;
         int color = context.theme().textMuted();
 
-        context.draw().triangle(right - buttonSize * 0.5F, upY + buttonSize * 0.75F,
-                right + buttonSize * 0.2F, upY + buttonSize * 0.25F,
-                right - buttonSize * 1.2F, upY + buttonSize * 0.25F, color);
-        context.draw().triangle(right - buttonSize * 0.5F, downY + buttonSize * 0.25F,
-                right - buttonSize * 1.2F, downY + buttonSize * 0.75F,
-                right + buttonSize * 0.2F, downY + buttonSize * 0.75F, color);
+        // Screen space grows downwards, so the base of the upper arrow is below
+        // its tip and the base of the lower arrow is above its tip.
+        context.draw().triangle(right - buttonSize * 0.5F, upY + buttonSize * 0.25F,
+                right - buttonSize * 1.2F, upY + buttonSize * 0.75F,
+                right + buttonSize * 0.2F, upY + buttonSize * 0.75F, color);
+        context.draw().triangle(right - buttonSize * 0.5F, downY + buttonSize * 0.75F,
+                right - buttonSize * 1.2F, downY + buttonSize * 0.25F,
+                right + buttonSize * 0.2F, downY + buttonSize * 0.25F, color);
     }
 
     @Override
