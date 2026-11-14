@@ -248,9 +248,13 @@ public final class MinecraftRenderBackend implements RenderBackend {
         int destinationWidth = Math.max(1, Math.round(width));
         int destinationHeight = Math.max(1, Math.round(height));
 
+        // The atlas is rasterised at the physical resolution, so the source
+        // rectangle is larger than the GUI sized destination. The overload
+        // that takes both sizes has to be used; otherwise Minecraft samples
+        // only the top left part of the glyph.
         graphics.blit(atlas.identifier(), sourceX, sourceY,
                 destinationX, destinationY, destinationWidth, destinationHeight,
-                textureWidth, textureHeight, argb);
+                sourceWidth, sourceHeight, textureWidth, textureHeight, argb);
     }
 
     @Override
@@ -275,10 +279,13 @@ public final class MinecraftRenderBackend implements RenderBackend {
         int textureWidth = Math.max(1, texture.width());
         int textureHeight = Math.max(1, texture.height());
 
+        int sourceWidth = Math.max(1, Math.round(srcWidth * textureWidth));
+        int sourceHeight = Math.max(1, Math.round(srcHeight * textureHeight));
         graphics.blit(texture.identifier(),
                 srcX * textureWidth, srcY * textureHeight,
                 Math.round(dstX), Math.round(dstY),
                 Math.max(1, Math.round(dstWidth)), Math.max(1, Math.round(dstHeight)),
+                sourceWidth, sourceHeight,
                 textureWidth, textureHeight, color);
     }
 
