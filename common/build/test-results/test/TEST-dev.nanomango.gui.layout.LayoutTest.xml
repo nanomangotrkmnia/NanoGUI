@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.layout.LayoutTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:03:34.586Z" hostname="Horaces-MacBook-Air.local" time="0.002">
+  <properties/>
+  <testcase name="the vertical layout stacks the children from top to bottom" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="the vertical layout stretches the children to the full width" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="the preferred height accounts for the spacing" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="the vertical layout can centre the children" classname="dev.nanomango.gui.layout.LayoutTest" time="0.001"/>
+  <testcase name="a container finds its descendants by id" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="the grid layout fills the rows from left to right" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="the stack layout places every child on top of each other" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <testcase name="invisible children are skipped by the layout" classname="dev.nanomango.gui.layout.LayoutTest" time="0.001"/>
+  <testcase name="the horizontal layout places the children next to each other" classname="dev.nanomango.gui.layout.LayoutTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

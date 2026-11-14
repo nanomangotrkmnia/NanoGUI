@@ -1,0 +1,10 @@
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-unknown-linux-gnu/release/build/log/a60f721c3a062ac6/out/log-a60f721c3a062ac6.d: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/macros.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/serde.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/__private_api.rs
+
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-unknown-linux-gnu/release/build/log/a60f721c3a062ac6/out/liblog-a60f721c3a062ac6.rlib: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/macros.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/serde.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/__private_api.rs
+
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-unknown-linux-gnu/release/build/log/a60f721c3a062ac6/out/liblog-a60f721c3a062ac6.rmeta: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/macros.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/serde.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/__private_api.rs
+
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/lib.rs:
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/macros.rs:
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/serde.rs:
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/log-0.4.35/src/__private_api.rs:

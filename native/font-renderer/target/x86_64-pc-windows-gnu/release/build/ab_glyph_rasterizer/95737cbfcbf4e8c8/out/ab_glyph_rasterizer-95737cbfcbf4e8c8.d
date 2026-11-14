@@ -1,0 +1,9 @@
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-pc-windows-gnu/release/build/ab_glyph_rasterizer/95737cbfcbf4e8c8/out/ab_glyph_rasterizer-95737cbfcbf4e8c8.d: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/geometry.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/raster.rs
+
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-pc-windows-gnu/release/build/ab_glyph_rasterizer/95737cbfcbf4e8c8/out/libab_glyph_rasterizer-95737cbfcbf4e8c8.rlib: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/geometry.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/raster.rs
+
+/Users/nanomango/Documents/NanoArray/native/font-renderer/target/x86_64-pc-windows-gnu/release/build/ab_glyph_rasterizer/95737cbfcbf4e8c8/out/libab_glyph_rasterizer-95737cbfcbf4e8c8.rmeta: /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/lib.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/geometry.rs /Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/raster.rs
+
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/lib.rs:
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/geometry.rs:
+/Users/nanomango/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ab_glyph_rasterizer-0.1.10/src/raster.rs:

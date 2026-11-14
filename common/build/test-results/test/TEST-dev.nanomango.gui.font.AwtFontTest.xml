@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.font.AwtFontTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:03:34.420Z" hostname="Horaces-MacBook-Air.local" time="0.14">
+  <properties/>
+  <testcase name="the glyphs are positioned relative to the baseline" classname="dev.nanomango.gui.font.AwtFontTest" time="0.117"/>
+  <testcase name="an empty string has no width" classname="dev.nanomango.gui.font.AwtFontTest" time="0.0"/>
+  <testcase name="a longer string is wider than a shorter one" classname="dev.nanomango.gui.font.AwtFontTest" time="0.001"/>
+  <testcase name="the glyph atlas contains rasterised pixels" classname="dev.nanomango.gui.font.AwtFontTest" time="0.003"/>
+  <testcase name="shaping produces glyph quads" classname="dev.nanomango.gui.font.AwtFontTest" time="0.0"/>
+  <testcase name="the measurement cache returns the same result" classname="dev.nanomango.gui.font.AwtFontTest" time="0.001"/>
+  <testcase name="measuring a string returns a positive width" classname="dev.nanomango.gui.font.AwtFontTest" time="0.001"/>
+  <testcase name="the font exposes sane vertical metrics" classname="dev.nanomango.gui.font.AwtFontTest" time="0.0"/>
+  <testcase name="whitespace advances the pen" classname="dev.nanomango.gui.font.AwtFontTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

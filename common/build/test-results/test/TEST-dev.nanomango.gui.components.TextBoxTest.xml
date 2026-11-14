@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.components.TextBoxTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:03:34.386Z" hostname="Horaces-MacBook-Air.local" time="0.007">
+  <properties/>
+  <testcase name="a text box that is not focused ignores the keyboard" classname="dev.nanomango.gui.components.TextBoxTest" time="0.003"/>
+  <testcase name="control and a selects the whole text" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="typing inserts characters at the caret" classname="dev.nanomango.gui.components.TextBoxTest" time="0.001"/>
+  <testcase name="the maximum length is respected" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="control and x cuts the selected text" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="the caret moves with the arrow keys" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="control and v inserts the clipboard contents" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="the change listener receives every modification" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="a password field masks its content" classname="dev.nanomango.gui.components.TextBoxTest" time="0.0"/>
+  <testcase name="backspace deletes the character before the caret" classname="dev.nanomango.gui.components.TextBoxTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

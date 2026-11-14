@@ -1,0 +1,29 @@
+[package]
+name = "nanoarray-font"
+version = "1.0.0"
+edition = "2021"
+description = "High performance font engine for the NanoArray GUI framework"
+license = "MIT"
+
+[lib]
+name = "nanoarray_font"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+ttf-parser = "0.25"
+rustybuzz = "0.20"
+ab_glyph = "0.2"
+jni = { version = "0.21", optional = true }
+
+[features]
+default = []
+# Enables the JNI entry points used by `dev.nanomango.gui.font.NativeFont`.
+jni = ["dep:jni"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+# Panics are caught at the JNI boundary, so unwinding must stay enabled.
+panic = "unwind"
+strip = "symbols"
