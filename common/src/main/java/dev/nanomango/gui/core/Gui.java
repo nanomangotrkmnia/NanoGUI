@@ -46,6 +46,7 @@ public final class Gui {
     private boolean dirty = true;
     private float lastDelta = 0.0F;
     private boolean autoSizeRoot = true;
+    private float pixelScale = 1.0F;
 
     public Gui() {
         root.setVisible(true);
@@ -124,6 +125,24 @@ public final class Gui {
 
     public boolean autoSizeRoot() {
         return autoSizeRoot;
+    }
+
+    /**
+     * Ratio between physical pixels and GUI units.
+     *
+     * <p>Everything inside the framework is measured in GUI units. Backends
+     * that render directly into physical pixels, such as NanoVG, need the
+     * ratio to keep text and geometry sharp on a high density display. The
+     * Minecraft backend already renders in GUI space and therefore ignores
+     * it.</p>
+     */
+    public Gui pixelScale(float pixelScale) {
+        this.pixelScale = pixelScale > 0.0F ? pixelScale : 1.0F;
+        return this;
+    }
+
+    public float pixelScale() {
+        return pixelScale;
     }
 
     public Font defaultFont() {
@@ -224,7 +243,7 @@ public final class Gui {
         context.setDeltaSeconds(deltaSeconds);
         context.setViewport(viewportWidth, viewportHeight);
         context.setMouse(mouseX, mouseY);
-        context.setScale(1.0F);
+        context.setScale(pixelScale);
 
         input.setMousePosition(mouseX, mouseY);
 

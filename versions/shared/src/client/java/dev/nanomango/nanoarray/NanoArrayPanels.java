@@ -25,8 +25,6 @@ import dev.nanomango.gui.components.Toggle;
 import dev.nanomango.gui.core.Gui;
 import dev.nanomango.gui.layout.VerticalLayout;
 
-import java.util.function.Consumer;
-
 /**
  * Builds the default user interface of the framework.
  *
@@ -185,10 +183,6 @@ public final class NanoArrayPanels {
         Button notify = new Button("Show a notification");
         notify.onClick(() -> notifications.info("NanoArray", "Everything works as expected"));
         panel.add(notify);
-
-        Consumer<String> unused = value -> {
-        };
-        unused.accept("");
 
         return panel;
     }
