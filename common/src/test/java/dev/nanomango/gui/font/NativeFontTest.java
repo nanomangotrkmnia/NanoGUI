@@ -255,6 +255,42 @@ class NativeFontTest {
     }
 
     @Test
+    @DisplayName("glyphs land on whole physical pixels at any text position")
+    void glyphsSnapToThePixelGrid() throws Exception {
+        float scale = 2.0F;
+        NativeFont scaled = new NativeFont(10, "Grid",
+                FontLoader.read(FontLoader.INTER_REGULAR), 16.0F, scale);
+        try {
+            for (float x : new float[]{0.0F, 10.3F, 17.77F, 33.5F}) {
+                RecordingSink sink = new RecordingSink();
+                scaled.draw(sink, "Inconsistent spacing WAVE 123", x, 5.3F, 0xFFFFFFFF);
+                assertTrue(sink.glyphs.size() > 10);
+                for (float[] glyph : sink.glyphs) {
+                    assertWhole(glyph[4] * scale);
+                    assertWhole(glyph[5] * scale);
+                }
+            }
+        } finally {
+            scaled.close();
+        }
+    }
+
+    @Test
+    @DisplayName("long text is encoded before the buffer is read")
+    void longTextAfterShortText() {
+        RecordingSink sink = new RecordingSink();
+        font.draw(sink, "a", 0.0F, 0.0F, 0xFFFFFFFF);
+        String longText = "The quick brown fox jumps over the lazy dog again and again and again";
+        sink = new RecordingSink();
+        font.draw(sink, longText, 0.0F, 0.0F, 0xFFFFFFFF);
+        assertEquals(longText.replace(" ", "").length(), sink.glyphs.size());
+    }
+
+    private static void assertWhole(float value) {
+        assertEquals(Math.round(value), value, 0.001F, "not on a pixel boundary: " + value);
+    }
+
+    @Test
     @DisplayName("the native renderer can be closed and reports no glyphs afterwards")
     void close() throws Exception {
         NativeFont disposable = new NativeFont(8, "Disposable",

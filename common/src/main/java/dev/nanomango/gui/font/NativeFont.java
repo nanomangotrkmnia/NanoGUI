@@ -222,8 +222,9 @@ public final class NativeFont implements Font, AutoCloseable {
             return;
         }
 
-        byte[] utf8 = utf8Buffer;
+        // encode() can replace the buffer, so it has to be read afterwards.
         int length = encode(text);
+        byte[] utf8 = utf8Buffer;
         int capacity = glyphBuffer.length / GLYPH_STRIDE;
         int count = nShape(handle, utf8, length, glyphBuffer, capacity);
         while (count == capacity && capacity < 4096) {
@@ -232,9 +233,12 @@ public final class NativeFont implements Font, AutoCloseable {
             count = nShape(handle, utf8, length, glyphBuffer, capacity);
         }
 
-        // The native renderer reports the glyph offsets relative to the
-        // baseline, the framework works with the top of the line.
-        float baseline = y + ascent;
+        // The native renderer reports whole pixel glyph offsets relative to
+        // the baseline. Snapping the origin to a physical pixel keeps every
+        // glyph on the pixel grid, so the atlas is drawn without resampling
+        // and the gaps between letters stay even.
+        float originX = Math.round(x * rasterScale);
+        float baselineY = Math.round((y + ascent) * rasterScale);
 
         for (int i = 0; i < count; i++) {
             int base = i * GLYPH_STRIDE;
@@ -252,8 +256,8 @@ public final class NativeFont implements Font, AutoCloseable {
             // The atlas is rasterised at the physical resolution, so the
             // glyph geometry has to be converted back into GUI units.
             sink.glyph(id, id, u0, v0, u1, v1,
-                    x + glyphX / rasterScale,
-                    baseline + glyphY / rasterScale,
+                    (originX + glyphX) / rasterScale,
+                    (baselineY + glyphY) / rasterScale,
                     width / rasterScale,
                     height / rasterScale,
                     argb);

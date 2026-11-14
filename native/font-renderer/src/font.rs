@@ -5,6 +5,13 @@ use ab_glyph::{point, Font as AbFont, FontRef, Glyph, GlyphId, PxScale};
 use rustybuzz::{shape, Face, UnicodeBuffer};
 use std::collections::HashMap;
 
+/// Number of horizontal subpixel positions every glyph is rasterised at.
+pub const SUBPIXEL_STEPS: u32 = 4;
+
+fn cache_key(glyph_id: u32, phase: u32) -> u64 {
+    ((glyph_id as u64) << 8) | phase as u64
+}
+
 /// A loaded font with its shaping state and glyph atlas.
 ///
 /// # Memory management
@@ -26,10 +33,10 @@ pub struct FontHandle {
     size: f32,
     upem: f32,
     atlas: Atlas,
-    /// Cached glyph bitmaps, keyed by glyph id.
-    glyphs: HashMap<u32, GlyphBitmap>,
+    /// Cached glyph bitmaps, keyed by glyph id and subpixel phase.
+    glyphs: HashMap<u64, GlyphBitmap>,
     /// Position of every cached glyph inside the atlas.
-    positions: HashMap<u32, (usize, usize)>,
+    positions: HashMap<u64, (usize, usize)>,
 }
 
 impl FontHandle {
@@ -168,6 +175,11 @@ impl FontHandle {
     /// where `(x, y)` is the top left corner of the glyph bitmap relative to
     /// the baseline origin.
     ///
+    /// `x` and `y` are always whole pixels. The fractional part of the pen
+    /// position is baked into the bitmap instead (one of [`SUBPIXEL_STEPS`]
+    /// horizontal phases), so the bitmap can be drawn one to one without
+    /// resampling and the advances between glyphs stay exact.
+    ///
     /// Returns the number of written glyphs.
     pub fn shape(&mut self, text: &[u8], out: &mut [f32], max_glyphs: usize) -> usize {
         let output = self.shape_text(text);
@@ -189,10 +201,21 @@ impl FontHandle {
                 break;
             }
 
-            self.ensure_glyph(glyph_id);
+            let glyph_x = pen_x + position.x_offset as f32 * scale;
+            let glyph_y = pen_y + position.y_offset as f32 * scale;
+            let mut whole_x = glyph_x.floor();
+            let mut phase = ((glyph_x - whole_x) * SUBPIXEL_STEPS as f32).round() as u32;
+            if phase >= SUBPIXEL_STEPS {
+                whole_x += 1.0;
+                phase = 0;
+            }
+            let whole_y = glyph_y.round();
+            let key = cache_key(glyph_id, phase);
+
+            self.ensure_glyph(glyph_id, phase);
 
             let (bitmap_x, bitmap_y, bitmap_w, bitmap_h, x_offset, y_offset) =
-                match (self.glyphs.get(&glyph_id), self.positions.get(&glyph_id)) {
+                match (self.glyphs.get(&key), self.positions.get(&key)) {
                     (Some(bitmap), Some(position)) => (
                         position.0,
                         position.1,
@@ -208,8 +231,8 @@ impl FontHandle {
             let atlas_height = self.atlas.height() as f32;
 
             let base = written * crate::GLYPH_STRIDE;
-            out[base] = pen_x + x_offset + position.x_offset as f32 * scale;
-            out[base + 1] = pen_y + y_offset + position.y_offset as f32 * scale;
+            out[base] = whole_x + x_offset;
+            out[base + 1] = whole_y + y_offset;
             out[base + 2] = bitmap_x as f32 / atlas_width;
             out[base + 3] = bitmap_y as f32 / atlas_height;
             out[base + 4] = (bitmap_x + bitmap_w) as f32 / atlas_width;
@@ -225,9 +248,11 @@ impl FontHandle {
         written
     }
 
-    /// Rasterises a glyph and stores it in the atlas when it is missing.
-    fn ensure_glyph(&mut self, glyph_id: u32) {
-        if self.glyphs.contains_key(&glyph_id) {
+    /// Rasterises a glyph at a subpixel phase and stores it in the atlas when
+    /// it is missing.
+    fn ensure_glyph(&mut self, glyph_id: u32, phase: u32) {
+        let key = cache_key(glyph_id, phase);
+        if self.glyphs.contains_key(&key) {
             return;
         }
         if self.atlas.is_full() {
@@ -238,7 +263,7 @@ impl FontHandle {
         let glyph = Glyph {
             id: GlyphId(glyph_id as u16),
             scale: px_scale,
-            position: point(0.0, 0.0),
+            position: point(phase as f32 / SUBPIXEL_STEPS as f32, 0.0),
         };
 
         let ab_font = self.ab_font.as_ref().expect("rasteriser is always present");
@@ -275,9 +300,9 @@ impl FontHandle {
 
         if let Some((x, y)) = self.atlas.allocate(width, height) {
             self.atlas.blit(x, y, &bitmap);
-            self.positions.insert(glyph_id, (x, y));
+            self.positions.insert(key, (x, y));
         }
-        self.glyphs.insert(glyph_id, bitmap);
+        self.glyphs.insert(key, bitmap);
     }
 }
 
@@ -420,6 +445,40 @@ mod tests {
             bottom > 0.5,
             "the descender must reach below the baseline: {bottom}"
         );
+    }
+
+    #[test]
+    fn glyphs_are_placed_on_whole_pixels() {
+        let Some(mut font) = inter() else {
+            return;
+        };
+        let mut buffer = [0.0f32; crate::GLYPH_STRIDE * 64];
+        let count = font.shape(b"Inconsistent spacing WAVE 123", &mut buffer, 64);
+        assert!(count > 10);
+        for i in 0..count {
+            let x = buffer[i * crate::GLYPH_STRIDE];
+            let y = buffer[i * crate::GLYPH_STRIDE + 1];
+            assert_eq!(x, x.round(), "glyph {i} x must be a whole pixel: {x}");
+            assert_eq!(y, y.round(), "glyph {i} y must be a whole pixel: {y}");
+        }
+    }
+
+    #[test]
+    fn subpixel_phases_follow_the_pen() {
+        let Some(mut font) = inter() else {
+            return;
+        };
+        // The same glyph repeated: the bitmap origin may only drift from the
+        // ideal pen position by less than one pixel.
+        let mut buffer = [0.0f32; crate::GLYPH_STRIDE * 32];
+        let count = font.shape(b"iiiiiiiiiiiiiiii", &mut buffer, 32);
+        let advance = font.measure(b"i");
+        let first = buffer[0];
+        for i in 0..count {
+            let x = buffer[i * crate::GLYPH_STRIDE];
+            let ideal = first + advance * i as f32;
+            assert!((x - ideal).abs() <= 1.0, "glyph {i} drifted: {x} vs {ideal}");
+        }
     }
 
     #[test]

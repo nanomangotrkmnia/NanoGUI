@@ -313,7 +313,9 @@ public final class AwtFont implements Font {
         }
         // The framework works with the top of the line, Java2D with the
         // baseline.
-        float baseline = y + ascent();
+        // Glyphs are placed on whole physical pixels so the atlas is drawn
+        // without resampling. The pen itself keeps its exact position.
+        float baseline = Math.round((y + ascent()) * rasterScale);
         float cursor = x;
         for (int i = 0; i < text.length(); i++) {
             Glyph glyph = glyph(text.charAt(i));
@@ -323,8 +325,8 @@ public final class AwtFont implements Font {
                         (float) glyph.y / atlasHeight,
                         (float) (glyph.x + glyph.width) / atlasWidth,
                         (float) (glyph.y + glyph.height) / atlasHeight,
-                        cursor + glyph.offsetX / rasterScale,
-                        baseline + glyph.offsetY / rasterScale,
+                        (Math.round(cursor * rasterScale) + glyph.offsetX) / rasterScale,
+                        (baseline + glyph.offsetY) / rasterScale,
                         glyph.width / rasterScale,
                         glyph.height / rasterScale,
                         argb);
