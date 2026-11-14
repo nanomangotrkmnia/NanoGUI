@@ -16,14 +16,47 @@ import java.util.Deque;
  * <p>The backend is available on every supported Minecraft version and on
  * every graphics backend, including Vulkan. Rounded corners are approximated
  * with axis aligned rectangles, see {@link RoundedRectangles}.</p>
+ *
+ * <p>Text is drawn in two different ways. The Minecraft font is rendered by
+ * Minecraft itself, the rasterising fonts of the framework (the native
+ * renderer and the Java2D fallback) push their glyphs into
+ * {@link #glyph(int, int, float, float, float, float, float, float, float, float, int)},
+ * where they are blitted from the glyph atlas.</p>
  */
 public final class MinecraftRenderBackend implements RenderBackend {
 
-    private final NanoArrayGraphics graphics;
+    private NanoArrayGraphics graphics;
+    private final FontAtlasRegistry atlases;
     private final Deque<int[]> scissorStack = new ArrayDeque<>();
 
-    public MinecraftRenderBackend(NanoArrayGraphics graphics) {
+    /** Registry of the fonts of the current frame. */
+    private FontRegistry fonts;
+
+    /** Resolves the numeric texture ids of the draw list. */
+    private TextureResolver textureResolver;
+
+    public MinecraftRenderBackend(FontAtlasRegistry atlases) {
+        this.atlases = atlases;
+    }
+
+    /**
+     * Installs the graphics object of the current frame.
+     *
+     * <p>Minecraft creates a new graphics object for every frame, so the
+     * backend keeps a single instance and only swaps the target.</p>
+     */
+    public MinecraftRenderBackend graphics(NanoArrayGraphics graphics) {
         this.graphics = graphics;
+        return this;
+    }
+
+    /**
+     * Installs the resolver that maps the texture ids of the draw list to
+     * Minecraft textures.
+     */
+    public MinecraftRenderBackend textureResolver(TextureResolver resolver) {
+        this.textureResolver = resolver;
+        return this;
     }
 
     @Override
@@ -33,6 +66,10 @@ public final class MinecraftRenderBackend implements RenderBackend {
 
     @Override
     public void render(RenderContext context, DrawList commands, FontRegistry fonts) {
+        if (graphics == null) {
+            return;
+        }
+        this.fonts = fonts;
         int opCursor = 0;
         int floatCursor = 0;
         int intCursor = 0;
@@ -99,15 +136,26 @@ public final class MinecraftRenderBackend implements RenderBackend {
                     if (font instanceof dev.nanomango.nanoarray.font.MinecraftFont minecraftFont) {
                         graphics.drawString(minecraftFont.minecraftFont(), text, Math.round(x), Math.round(y), color);
                     } else {
-                        // Fonts that are not backed by the Minecraft atlas are
-                        // drawn through the vector backend instead.
+                        // Fonts that are not backed by the Minecraft atlas push
+                        // their glyphs into this backend.
                         font.draw(this, text, x, y, color);
                     }
                 }
                 case DrawList.OP_TEXTURE -> {
-                    commands.floatAt(floatCursor + 7);
-                    floatCursor += 8;
-                    intCursor += 2;
+                    float srcX = commands.floatAt(floatCursor++);
+                    float srcY = commands.floatAt(floatCursor++);
+                    float srcWidth = commands.floatAt(floatCursor++);
+                    float srcHeight = commands.floatAt(floatCursor++);
+                    float dstX = commands.floatAt(floatCursor++);
+                    float dstY = commands.floatAt(floatCursor++);
+                    float dstWidth = commands.floatAt(floatCursor++);
+                    float dstHeight = commands.floatAt(floatCursor++);
+                    int textureId = commands.intAt(intCursor++);
+                    int color = commands.intAt(intCursor++);
+                    // The texture has to be registered by the host, textures
+                    // that are unknown are simply skipped.
+                    drawTexture(textureId, srcX, srcY, srcWidth, srcHeight,
+                            dstX, dstY, dstWidth, dstHeight, color);
                 }
                 case DrawList.OP_LINE -> {
                     float x1 = commands.floatAt(floatCursor++);
@@ -168,16 +216,74 @@ public final class MinecraftRenderBackend implements RenderBackend {
     public void glyph(int fontId, int textureId,
                       float u0, float v0, float u1, float v1,
                       float x, float y, float width, float height, int argb) {
-        // Rasterised glyphs require a texture capable backend. The Minecraft
-        // backend only supports the built in font atlas.
+        if (width <= 0.0F || height <= 0.0F || fonts == null || graphics == null) {
+            return;
+        }
+        Font font = fonts.findById(fontId);
+        if (font == null) {
+            return;
+        }
+        FontAtlasRegistry.Atlas atlas = atlases.atlas(fontId, font.texture());
+        if (atlas == null) {
+            return;
+        }
+
+        int textureWidth = atlas.width();
+        int textureHeight = atlas.height();
+
+        // The source rectangle is addressed in pixels of the atlas.
+        int sourceX = Math.round(u0 * textureWidth);
+        int sourceY = Math.round(v0 * textureHeight);
+        int sourceWidth = Math.max(1, Math.round((u1 - u0) * textureWidth));
+        int sourceHeight = Math.max(1, Math.round((v1 - v0) * textureHeight));
+
+        // Minecraft draws at integer positions, the glyph is aligned to the
+        // pixel grid so that the text does not shimmer.
+        int destinationX = (int) Math.floor(x);
+        int destinationY = (int) Math.floor(y);
+        int destinationWidth = Math.max(1, (int) Math.ceil(x + width) - destinationX);
+        int destinationHeight = Math.max(1, (int) Math.ceil(y + height) - destinationY);
+
+        graphics.blit(atlas.identifier(), sourceX, sourceY,
+                destinationX, destinationY, destinationWidth, destinationHeight,
+                textureWidth, textureHeight, argb);
     }
 
     @Override
     public void endFrame(RenderContext context) {
+        if (graphics == null) {
+            return;
+        }
         while (!scissorStack.isEmpty()) {
             graphics.disableScissor();
             scissorStack.pop();
         }
+    }
+
+    private void drawTexture(int textureId, float srcX, float srcY, float srcWidth, float srcHeight,
+                             float dstX, float dstY, float dstWidth, float dstHeight, int color) {
+        // Textures are registered by the host application, the framework only
+        // knows their numeric id.
+        NanoArrayTexture texture = textureResolver == null ? null : textureResolver.resolve(textureId);
+        if (texture == null) {
+            return;
+        }
+        int textureWidth = Math.max(1, texture.width());
+        int textureHeight = Math.max(1, texture.height());
+
+        graphics.blit(texture.identifier(),
+                srcX * textureWidth, srcY * textureHeight,
+                Math.round(dstX), Math.round(dstY),
+                Math.max(1, Math.round(dstWidth)), Math.max(1, Math.round(dstHeight)),
+                textureWidth, textureHeight, color);
+    }
+
+    /**
+     * Resolves the numeric texture ids of the draw list.
+     */
+    @FunctionalInterface
+    public interface TextureResolver {
+        NanoArrayTexture resolve(int textureId);
     }
 
     private void pushScissor(float x, float y, float width, float height) {
@@ -283,6 +389,7 @@ public final class MinecraftRenderBackend implements RenderBackend {
             int py = Math.round(y + (float) Math.sin(angle) * radius);
             graphics.fill(px, py, px + 1, py + 1, color);
         }
+
         if (inner > 0) {
             // The inner hole is punched out by the caller drawing the
             // background over it, so nothing has to be done here.

@@ -83,43 +83,45 @@ public final class ThemeManager {
      */
     public Theme withAccent(int accent) {
         Theme base = current;
-        Theme derived = Theme.builder(base.id() + ".accent", base.name() + " (Custom)")
-                .dark(base.isDark())
-                .background(base.background())
-                .surface(base.surface())
-                .surfaceVariant(base.surfaceVariant())
-                .surfaceElevated(base.surfaceElevated())
-                .overlay(base.overlay())
+        Theme derived = Theme.Builder.copyOf(base)
+                .id(base.id() + ".accent")
+                .name(base.name() + " (Custom)")
                 .accent(accent)
-                .onAccent(base.onAccent())
-                .text(base.text())
-                .textMuted(base.textMuted())
-                .textDisabled(base.textDisabled())
-                .border(base.border())
-                .borderStrong(base.borderStrong())
-                .success(base.success())
-                .warning(base.warning())
-                .danger(base.danger())
-                .scrollbar(base.scrollbar())
-                .scrollbarHover(base.scrollbarHover())
-                .shadow(base.shadow())
-                .selection(base.selection())
-                .radius(base.radius())
-                .smallRadius(base.smallRadius())
-                .spacing(base.spacing())
-                .padding(base.padding())
-                .borderWidth(base.borderWidth())
-                .iconSize(base.iconSize())
-                .scrollbarWidth(base.scrollbarWidth())
-                .controlHeight(base.controlHeight())
-                .opacity(base.opacity())
-                .shadowEnabled(base.shadowEnabled())
-                .shadowBlur(base.shadowBlur())
-                .shadowOffsetY(base.shadowOffsetY())
-                .fonts(base.regularFont(), base.mediumFont(), base.boldFont())
                 .build();
         register(derived);
         current = derived;
         return derived;
+    }
+
+    /**
+     * Replaces the fonts of every registered theme.
+     *
+     * <p>Themes are immutable, so every theme is rebuilt with the new fonts.
+     * The identifiers and the order of the themes are preserved, which keeps
+     * the stored theme selection valid.</p>
+     *
+     * @param regular the regular weight
+     * @param medium  the medium weight
+     * @param bold    the bold weight
+     */
+    public void setFonts(dev.nanomango.gui.font.Font regular,
+                         dev.nanomango.gui.font.Font medium,
+                         dev.nanomango.gui.font.Font bold) {
+        Map<String, Theme> rebuilt = new LinkedHashMap<>();
+        for (Theme theme : themes.values()) {
+            Theme copy = Theme.Builder.copyOf(theme)
+                    .fonts(regular, medium, bold)
+                    .build();
+            rebuilt.put(copy.id(), copy);
+        }
+        themes.clear();
+        themes.putAll(rebuilt);
+
+        if (current != null) {
+            current = rebuilt.get(current.id());
+            if (current == null) {
+                current = themes.values().iterator().next();
+            }
+        }
     }
 }

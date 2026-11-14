@@ -29,6 +29,9 @@ public class Tabs extends Container {
     /** Tab hit boxes, refreshed every frame. */
     private final List<float[]> tabBounds = new ArrayList<>();
 
+    /** Height of the tab bar, refreshed every frame by {@link #render}. */
+    private float headerHeight;
+
     public Tabs() {
         super(new dev.nanomango.gui.layout.StackLayout());
         clip(false);
@@ -79,6 +82,7 @@ public class Tabs extends Container {
     @Override
     public void render(GuiContext context) {
         float tabHeight = context.theme().controlHeight() + 4.0F;
+        this.headerHeight = tabHeight;
         float cursor = x();
         float indicatorX = x();
         float indicatorWidth = 0.0F;
@@ -131,9 +135,8 @@ public class Tabs extends Container {
         if (!isVisible() || !isEnabled()) {
             return false;
         }
-        float tabHeight = height() > 0.0F ? 0.0F : 0.0F;
-        float headerHeight = tabBounds.isEmpty() ? 0.0F : tabBounds.get(0)[1];
-        if (mouseY >= y() && mouseY < y() + headerHeight + 6.0F) {
+        // The tab bar only reacts to the primary button.
+        if (button == 0 && mouseY >= y() && mouseY < y() + headerHeight) {
             for (int i = 0; i < tabBounds.size(); i++) {
                 float[] bounds = tabBounds.get(i);
                 if (mouseX >= bounds[0] && mouseX < bounds[0] + bounds[1]) {
@@ -141,6 +144,9 @@ public class Tabs extends Container {
                     return true;
                 }
             }
+            // The click was inside the tab bar but not on a tab, so it is
+            // consumed but does not change the selection.
+            return true;
         }
         for (int i = 0; i < contents.size(); i++) {
             Container content = contents.get(i);

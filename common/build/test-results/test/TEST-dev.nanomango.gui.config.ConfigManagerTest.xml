@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="dev.nanomango.gui.config.ConfigManagerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:03:34.393Z" hostname="Horaces-MacBook-Air.local" time="0.021">
+<testsuite name="dev.nanomango.gui.config.ConfigManagerTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T03:10:08.330Z" hostname="Horaces-MacBook-Air.local" time="0.047">
   <properties/>
-  <testcase name="a corrupted file is backed up and the configuration starts empty" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.011"/>
-  <testcase name="removing a key marks the configuration as dirty" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.002"/>
+  <testcase name="a corrupted file is backed up and the configuration starts empty" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.029"/>
+  <testcase name="removing a key marks the configuration as dirty" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.005"/>
   <testcase name="values of the wrong type fall back to the default" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
-  <testcase name="the parent directory is created when it does not exist" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
-  <testcase name="values survive a save and load cycle" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
-  <testcase name="namespaced accessors read and write values" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.0"/>
+  <testcase name="the parent directory is created when it does not exist" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.002"/>
+  <testcase name="values survive a save and load cycle" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.003"/>
+  <testcase name="namespaced accessors read and write values" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
   <testcase name="a file with the wrong shape is handled gracefully" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
-  <testcase name="a missing file starts with an empty configuration" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.0"/>
-  <testcase name="the written file is valid JSON" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
-  <testcase name="flushing without changes does not touch the disk" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.0"/>
+  <testcase name="a missing file starts with an empty configuration" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
+  <testcase name="the written file is valid JSON" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.002"/>
+  <testcase name="flushing without changes does not touch the disk" classname="dev.nanomango.gui.config.ConfigManagerTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

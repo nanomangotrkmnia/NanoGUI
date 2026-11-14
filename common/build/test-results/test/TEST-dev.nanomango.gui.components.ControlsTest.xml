@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.components.ControlsTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-11-14T03:10:08.292Z" hostname="Horaces-MacBook-Air.local" time="0.029">
+  <properties/>
+  <testcase name="a disabled control does not react to clicks" classname="dev.nanomango.gui.components.ControlsTest" time="0.013"/>
+  <testcase name="the toggle does not change when the value stays the same" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="clicking the dropdown opens it and clicking an option selects it" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="clicking outside of the open dropdown closes it" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="the slider clamps and reports changed values" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="the slider clamps the initial value" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="clicking a tab in the header selects it" classname="dev.nanomango.gui.components.ControlsTest" time="0.003"/>
+  <testcase name="the first tab is selected by default" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="selecting a tab shows only its content" classname="dev.nanomango.gui.components.ControlsTest" time="0.0"/>
+  <testcase name="clicking the toggle flips its value" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="a click below the header does not change the selection" classname="dev.nanomango.gui.components.ControlsTest" time="0.0"/>
+  <testcase name="clicking the checkbox flips its value" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="the dropdown starts without a selection" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="clicking the slider track moves the handle" classname="dev.nanomango.gui.components.ControlsTest" time="0.002"/>
+  <testcase name="dragging the slider updates the value" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <testcase name="the slider snaps the value to the step" classname="dev.nanomango.gui.components.ControlsTest" time="0.0"/>
+  <testcase name="selecting an option reports the change" classname="dev.nanomango.gui.components.ControlsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

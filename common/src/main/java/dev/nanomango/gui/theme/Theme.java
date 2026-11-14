@@ -262,8 +262,8 @@ public final class Theme {
      */
     public static final class Builder {
 
-        private final String id;
-        private final String name;
+        private String id;
+        private String name;
         private boolean dark = true;
 
         private int background = 0xE6121418;
@@ -311,8 +311,77 @@ public final class Theme {
             this.name = name;
         }
 
+        /**
+         * Creates a builder that starts with the values of an existing theme.
+         *
+         * <p>Every property, including the fonts, is copied so that the new
+         * theme only differs in the properties that are changed afterwards.
+         * This is used to re-theme a theme at runtime without losing its
+         * configuration.</p>
+         *
+         * @param theme the theme to copy, never {@code null}
+         * @return a builder pre-filled with the values of the theme
+         */
+        public static Builder copyOf(Theme theme) {
+            Builder builder = new Builder(theme.id, theme.name);
+            builder.dark = theme.dark;
+            builder.background = theme.background;
+            builder.surface = theme.surface;
+            builder.surfaceVariant = theme.surfaceVariant;
+            builder.surfaceElevated = theme.surfaceElevated;
+            builder.overlay = theme.overlay;
+            builder.accent = theme.accent;
+            builder.accentHover = theme.accentHover;
+            builder.accentPressed = theme.accentPressed;
+            builder.onAccent = theme.onAccent;
+            builder.text = theme.text;
+            builder.textMuted = theme.textMuted;
+            builder.textDisabled = theme.textDisabled;
+            builder.border = theme.border;
+            builder.borderStrong = theme.borderStrong;
+            builder.success = theme.success;
+            builder.warning = theme.warning;
+            builder.danger = theme.danger;
+            builder.scrollbar = theme.scrollbar;
+            builder.scrollbarHover = theme.scrollbarHover;
+            builder.shadow = theme.shadow;
+            builder.selection = theme.selection;
+            builder.radius = theme.radius;
+            builder.smallRadius = theme.smallRadius;
+            builder.spacing = theme.spacing;
+            builder.padding = theme.padding;
+            builder.borderWidth = theme.borderWidth;
+            builder.iconSize = theme.iconSize;
+            builder.scrollbarWidth = theme.scrollbarWidth;
+            builder.controlHeight = theme.controlHeight;
+            builder.opacity = theme.opacity;
+            builder.shadowEnabled = theme.shadowEnabled;
+            builder.shadowBlur = theme.shadowBlur;
+            builder.shadowOffsetY = theme.shadowOffsetY;
+            builder.regularFont = theme.regularFont;
+            builder.mediumFont = theme.mediumFont;
+            builder.boldFont = theme.boldFont;
+            return builder;
+        }
+
         public Builder dark(boolean dark) {
             this.dark = dark;
+            return this;
+        }
+
+        /**
+         * Changes the identifier of the theme.
+         */
+        public Builder id(String id) {
+            this.id = id;
+            return this;
+        }
+
+        /**
+         * Changes the display name of the theme.
+         */
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 

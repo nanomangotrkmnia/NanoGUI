@@ -2,6 +2,8 @@ package dev.nanomango.nanoarray.backend;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 /**
  * Adapts the Minecraft 1.21.x graphics object to {@link NanoArrayGraphics}.
@@ -27,6 +29,13 @@ public final class GuiGraphicsAdapter implements NanoArrayGraphics {
     @Override
     public void drawString(Font font, String text, int x, int y, int argb) {
         graphics.drawString(font, text, x, y, argb);
+    }
+
+    @Override
+    public void blit(Identifier texture, float u, float v, int x, int y, int width, int height,
+                     int textureWidth, int textureHeight, int argb) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
+                width, height, textureWidth, textureHeight, argb);
     }
 
     @Override

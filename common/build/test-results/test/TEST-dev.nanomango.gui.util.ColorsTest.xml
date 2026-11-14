@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="dev.nanomango.gui.util.ColorsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T01:03:34.588Z" hostname="Horaces-MacBook-Air.local" time="0.003">
+<testsuite name="dev.nanomango.gui.util.ColorsTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-11-14T03:10:08.951Z" hostname="Horaces-MacBook-Air.local" time="0.004">
   <properties/>
-  <testcase name="channel accessors return the expected values" classname="dev.nanomango.gui.util.ColorsTest" time="0.001"/>
+  <testcase name="channel accessors return the expected values" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="rgbToHsv is the inverse of hsv" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="hsv converts pure colours correctly" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="mix blends two colours and clamps the factor" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="rgb packs the channels into an opaque colour" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
-  <testcase name="argb packs the alpha channel" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
-  <testcase name="grey colours have no saturation" classname="dev.nanomango.gui.util.ColorsTest" time="0.001"/>
+  <testcase name="argb packs the alpha channel" classname="dev.nanomango.gui.util.ColorsTest" time="0.001"/>
+  <testcase name="grey colours have no saturation" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="fraction accessors match the byte accessors" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="withAlphaFactor scales the alpha channel" classname="dev.nanomango.gui.util.ColorsTest" time="0.0"/>
   <testcase name="withAlpha replaces the alpha channel and keeps the colour" classname="dev.nanomango.gui.util.ColorsTest" time="0.001"/>

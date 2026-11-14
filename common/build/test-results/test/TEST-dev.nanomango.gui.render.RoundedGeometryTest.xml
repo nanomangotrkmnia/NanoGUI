@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.render.RoundedGeometryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-14T03:10:08.257Z" hostname="Horaces-MacBook-Air.local" time="0.025">
+  <properties/>
+  <testcase name="the staircase has one band per step" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.01"/>
+  <testcase name="the radius never exceeds half of the smaller side" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.001"/>
+  <testcase name="a tiny radius is drawn as a plain rectangle" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.001"/>
+  <testcase name="the bands stay inside the radius" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.001"/>
+  <testcase name="the geometry is cached and therefore stable" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.0"/>
+  <testcase name="the staircase covers the full height of the corner" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.001"/>
+  <testcase name="the inset shrinks towards the middle of the rectangle" classname="dev.nanomango.gui.render.RoundedGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

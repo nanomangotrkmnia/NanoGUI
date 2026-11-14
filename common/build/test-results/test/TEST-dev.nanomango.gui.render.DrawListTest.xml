@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="dev.nanomango.gui.render.DrawListTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-14T03:10:08.930Z" hostname="Horaces-MacBook-Air.local" time="0.004">
+  <properties/>
+  <testcase name="every opcode knows how many arguments it has" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="a text command keeps its string" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="the clipping stack is balanced" classname="dev.nanomango.gui.render.DrawListTest" time="0.001"/>
+  <testcase name="equal strings share one pool entry" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="the arguments of a rectangle are stored in order" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="an empty text is not recorded" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="the list grows beyond its initial capacity" classname="dev.nanomango.gui.render.DrawListTest" time="0.001"/>
+  <testcase name="every command of the list can be walked by the backends" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="clearing the list resets it" classname="dev.nanomango.gui.render.DrawListTest" time="0.001"/>
+  <testcase name="a fresh draw list is empty" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="the commands are replayed in the order they were recorded" classname="dev.nanomango.gui.render.DrawListTest" time="0.0"/>
+  <testcase name="an unbalanced clip pop is ignored" classname="dev.nanomango.gui.render.DrawListTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
