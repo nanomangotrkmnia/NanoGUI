@@ -21,6 +21,9 @@ public class ColorPicker extends Component {
     private float saturation = 1.0F;
     private float brightness = 1.0F;
 
+    private boolean draggingSquare;
+    private boolean draggingHue;
+
     private final TextBox hexField = new TextBox();
 
     public ColorPicker() {
@@ -85,9 +88,9 @@ public class ColorPicker extends Component {
             return;
         }
 
-        float squareX = x();
-        float squareY = y() + previewSize + context.theme().spacing();
-        float squareSize = Math.min(width() - context.theme().controlHeight() - 8.0F, 100.0F);
+        float squareX = squareX();
+        float squareY = squareY();
+        float squareSize = squareSize();
 
         // Saturation / brightness square.
         int steps = 24;
@@ -102,8 +105,8 @@ public class ColorPicker extends Component {
         }
 
         // Hue strip.
-        float stripX = squareX + squareSize + 8.0F;
-        float stripWidth = context.theme().controlHeight();
+        float stripX = stripX();
+        float stripWidth = stripWidth();
         for (int i = 0; i < 16; i++) {
             int hueColor = Colors.hsv(i / 16.0F, 1.0F, 1.0F, 1.0F);
             context.draw().fillRect(stripX, squareY + i * (squareSize / 16.0F), stripWidth,
@@ -129,37 +132,96 @@ public class ColorPicker extends Component {
             return false;
         }
 
-        float previewSize = Math.min(width(), context0ControlHeight());
-        float squareX = x();
-        float squareY = y() + previewSize + context0Spacing();
-        float squareSize = Math.min(width() - context0ControlHeight() - 8.0F, 100.0F);
+        float squareX = squareX();
+        float squareY = squareY();
+        float squareSize = squareSize();
 
         if (mouseX >= squareX && mouseX < squareX + squareSize
                 && mouseY >= squareY && mouseY < squareY + squareSize) {
-            saturation = MathUtil.clamp((float) ((mouseX - squareX) / squareSize), 0.0F, 1.0F);
-            brightness = MathUtil.clamp(1.0F - (float) ((mouseY - squareY) / squareSize), 0.0F, 1.0F);
-            applyHsb();
+            draggingSquare = true;
+            updateSquare(mouseX, mouseY);
             return true;
         }
 
-        float stripX = squareX + squareSize + 8.0F;
-        float stripWidth = context0ControlHeight();
+        float stripX = stripX();
+        float stripWidth = stripWidth();
         if (mouseX >= stripX && mouseX < stripX + stripWidth
                 && mouseY >= squareY && mouseY < squareY + squareSize) {
-            hue = MathUtil.clamp((float) ((mouseY - squareY) / squareSize), 0.0F, 1.0F);
-            applyHsb();
+            draggingHue = true;
+            updateHue(mouseY);
             return true;
         }
 
         return true;
     }
 
-    private float context0ControlHeight() {
-        return 24.0F;
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (!open || button != 0) {
+            return false;
+        }
+        if (draggingSquare) {
+            updateSquare(mouseX, mouseY);
+            return true;
+        }
+        if (draggingHue) {
+            updateHue(mouseY);
+            return true;
+        }
+        return false;
     }
 
-    private float context0Spacing() {
-        return 6.0F;
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        boolean wasDragging = draggingSquare || draggingHue;
+        draggingSquare = false;
+        draggingHue = false;
+        return wasDragging || super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    private void updateSquare(double mouseX, double mouseY) {
+        float size = Math.max(1.0F, squareSize());
+        saturation = MathUtil.clamp((float) ((mouseX - squareX()) / size), 0.0F, 1.0F);
+        brightness = MathUtil.clamp(1.0F - (float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
+        applyHsb();
+    }
+
+    private void updateHue(double mouseY) {
+        float size = Math.max(1.0F, squareSize());
+        hue = MathUtil.clamp((float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
+        applyHsb();
+    }
+
+    private float controlHeight() {
+        return context != null ? context.theme().controlHeight() : 24.0F;
+    }
+
+    private float spacing() {
+        return context != null ? context.theme().spacing() : 6.0F;
+    }
+
+    private float previewSize() {
+        return Math.min(width(), controlHeight());
+    }
+
+    private float squareX() {
+        return x();
+    }
+
+    private float squareY() {
+        return y() + previewSize() + spacing();
+    }
+
+    private float squareSize() {
+        return Math.min(width() - controlHeight() - 8.0F, 100.0F);
+    }
+
+    private float stripX() {
+        return squareX() + squareSize() + 8.0F;
+    }
+
+    private float stripWidth() {
+        return controlHeight();
     }
 
     @Override

@@ -266,10 +266,10 @@ public final class Theme {
         private String name;
         private boolean dark = true;
 
-        private int background = 0xE6121418;
-        private int surface = 0xF21A1D23;
-        private int surfaceVariant = 0xF222262D;
-        private int surfaceElevated = 0xF2272C35;
+        private int background = 0xFF121418;
+        private int surface = 0xFF1A1D23;
+        private int surfaceVariant = 0xFF22262D;
+        private int surfaceElevated = 0xFF272C35;
         private int overlay = 0x99000000;
         private int accent = 0xFF4C8DFF;
         private int accentHover = 0xFF6BA1FF;

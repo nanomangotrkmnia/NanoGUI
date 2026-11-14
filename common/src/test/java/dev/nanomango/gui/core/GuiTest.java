@@ -18,6 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GuiTest {
@@ -46,6 +47,12 @@ class GuiTest {
         });
         gui.fonts().register(TestSupport.testFont());
         gui.fonts().setDefaultFont(TestSupport.testFont());
+    }
+
+    @Test
+    @DisplayName("the overlay of the GUI is the one the components write to")
+    void sharedOverlay() {
+        assertSame(gui.context().overlay(), gui.overlay());
     }
 
     @Test

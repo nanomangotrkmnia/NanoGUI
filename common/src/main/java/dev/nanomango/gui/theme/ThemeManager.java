@@ -25,7 +25,7 @@ public final class ThemeManager {
                 .build();
         Theme light = Theme.builder(LIGHT_ID, "NanoArray Light")
                 .dark(false)
-                .background(0xF2F4F7)
+                .background(0xFFF2F4F7)
                 .surface(0xFFFFFFFF)
                 .surfaceVariant(0xFFEDEFF3)
                 .surfaceElevated(0xFFFFFFFF)

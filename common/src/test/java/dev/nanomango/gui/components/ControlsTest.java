@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -313,5 +314,41 @@ class ControlsTest {
         // content of the active tab and cannot change the selection.
         tabs.mouseClicked(firstWidth + 2.0F, headerHeight + 20.0F, 0);
         assertEquals(0, tabs.selectedIndex());
+    }
+
+    @Test
+    @DisplayName("dragging the colour square keeps updating the colour")
+    void colorPickerDrag() {
+        ColorPicker picker = new ColorPicker(0xFF000000);
+        picker.setBounds(0.0F, 0.0F, 180.0F, 150.0F);
+        picker.setContext(context);
+        picker.setOpen(true);
+
+        float preview = context.theme().controlHeight();
+        float squareY = preview + context.theme().spacing();
+        float squareSize = Math.min(180.0F - preview - 8.0F, 100.0F);
+
+        assertTrue(picker.mouseClicked(10.0, squareY + 10.0, 0));
+        int afterClick = picker.color();
+        assertTrue(picker.mouseDragged(squareSize * 0.8, squareY + squareSize * 0.8, 0, 0.0, 0.0));
+        assertNotEquals(afterClick, picker.color(), "the drag must change the colour");
+
+        assertTrue(picker.mouseReleased(squareSize * 0.8, squareY + squareSize * 0.8, 0));
+        assertFalse(picker.mouseDragged(0.0, 0.0, 0, 0.0, 0.0),
+                "the drag must stop after the button is released");
+    }
+
+    @Test
+    @DisplayName("an open dropdown registers with the overlay")
+    void dropdownUsesOverlay() {
+        Dropdown dropdown = new Dropdown().options("A", "B");
+        dropdown.setContext(context);
+        dropdown.setOpen(true);
+
+        assertTrue(context.overlay().components().contains(dropdown),
+                "the popup must be drawn above its siblings");
+
+        dropdown.setOpen(false);
+        assertFalse(context.overlay().components().contains(dropdown));
     }
 }

@@ -32,7 +32,7 @@ public final class Gui {
     private final InputState input = new InputState();
     private final DrawList drawList = new DrawList();
     private final GuiContext context = new GuiContext(themes.current(), input, drawList, fonts);
-    private final OverlayLayer overlay = new OverlayLayer();
+    private final OverlayLayer overlay = context.overlay();
     private final RenderContext renderContext = new RenderContext();
     private final ModuleManager modules = new ModuleManager();
 

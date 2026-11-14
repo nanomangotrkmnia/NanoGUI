@@ -112,12 +112,17 @@ public class Dropdown extends Component {
     private dev.nanomango.gui.core.OverlayLayer pendingOverlay;
 
     private void contextOverlayAdd() {
-        if (pendingOverlay != null) {
+        if (context != null) {
+            context.overlay().add(this);
+        } else if (pendingOverlay != null) {
             pendingOverlay.add(this);
         }
     }
 
     private void contextOverlayRemove() {
+        if (context != null) {
+            context.overlay().remove(this);
+        }
         if (pendingOverlay != null) {
             pendingOverlay.remove(this);
         }
@@ -160,6 +165,12 @@ public class Dropdown extends Component {
                 arrowY + arrowSize, arrowColor);
 
         if (open) {
+            // The popup has to be drawn by the overlay, otherwise the next
+            // sibling in the panel paints over it. Re-add it here in case the
+            // overlay was cleared while the GUI was closed.
+            if (context.overlay() != null && !context.overlay().components().contains(this)) {
+                context.overlay().add(this);
+            }
             renderPopup(context);
         }
     }
