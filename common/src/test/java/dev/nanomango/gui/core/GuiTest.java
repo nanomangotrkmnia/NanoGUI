@@ -174,6 +174,62 @@ class GuiTest {
     }
 
     @Test
+    @DisplayName("selecting an option closes the dropdown and empties the overlay")
+    void dropdownClosesOnSelection() {
+        Dropdown dropdown = new Dropdown().options("A", "B");
+        gui.root().add(dropdown);
+        gui.open();
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        gui.mouseClicked(20, 20, 0);
+        gui.mouseReleased(20, 20, 0);
+        assertTrue(dropdown.isOpen());
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        float row = gui.context().theme().controlHeight();
+        double rowY = dropdown.height() + 2 + row * 1.5F;
+        gui.mouseClicked(20, rowY, 0);
+        gui.mouseReleased(20, rowY, 0);
+        assertEquals("B", dropdown.selected());
+        assertFalse(dropdown.isOpen(), "picking an option must close the list");
+        assertTrue(gui.overlay().isEmpty(), "the popup must leave the overlay after selection");
+
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+        assertTrue(gui.overlay().isEmpty(), "the popup must stay closed on later frames");
+    }
+
+    @Test
+    @DisplayName("a click on the popup is not stolen by the control underneath")
+    void popupClickBeatsUnderlyingControl() {
+        Dropdown dropdown = new Dropdown().options("A", "B");
+        gui.root().add(dropdown);
+        AtomicInteger clicks = new AtomicInteger();
+        Button underneath = new Button("Under");
+        underneath.onClick(clicks::incrementAndGet);
+        gui.root().add(underneath);
+        gui.open();
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        // The button covers the second popup row, like the next settings
+        // control does in the panel.
+        float row = gui.context().theme().controlHeight();
+        underneath.setBounds(dropdown.x(), dropdown.y() + dropdown.height() + 2.0F + row,
+                dropdown.width(), row);
+
+        gui.mouseClicked(20, 20, 0);
+        gui.mouseReleased(20, 20, 0);
+        assertTrue(dropdown.isOpen());
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        double rowY = dropdown.height() + 2 + row * 1.5F;
+        gui.mouseClicked(20, rowY, 0);
+        gui.mouseReleased(20, rowY, 0);
+        assertEquals(0, clicks.get(), "the control underneath must not receive the click");
+        assertFalse(dropdown.isOpen(), "picking an option must close the list");
+        assertTrue(gui.overlay().isEmpty());
+    }
+
+    @Test
     @DisplayName("clicking a text field focuses it and clicking elsewhere releases the focus")
     void clickMovesFocus() {
         SearchField search = new SearchField();

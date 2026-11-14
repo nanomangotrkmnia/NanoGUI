@@ -232,15 +232,17 @@ public class Dropdown extends Component {
         // The list always opens below the control. Flipping it above moved the
         // options onto the widget itself and made the control look covered.
         this.popupY = y() + height() + 2.0F;
+        // The popup is a real component: without bounds its own hit test is
+        // empty and every click falls through to the control underneath.
+        popup.setBounds(x(), popupY, width(), visible * row + 4.0F);
     }
 
     private boolean insidePopup(double mouseX, double mouseY) {
         if (popupVisibleCount <= 0) {
             return false;
         }
-        float popupHeight = popupVisibleCount * popupRowHeight + 4.0F;
-        return mouseX >= x() && mouseX < x() + width()
-                && mouseY >= popupY && mouseY < popupY + popupHeight;
+        return mouseX >= popup.x() && mouseX < popup.x() + popup.width()
+                && mouseY >= popup.y() && mouseY < popup.y() + popup.height();
     }
 
     /**
@@ -258,14 +260,20 @@ public class Dropdown extends Component {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (!open || !insidePopup(mouseX, mouseY)) {
+            if (!open) {
                 return false;
             }
-            int index = (int) ((mouseY - popupY - 2.0F) / popupRowHeight);
-            if (index >= 0 && index < popupVisibleCount) {
-                setSelectedIndex(index);
+            if (insidePopup(mouseX, mouseY)) {
+                int index = (int) ((mouseY - popupY - 2.0F) / popupRowHeight);
+                if (index >= 0 && index < popupVisibleCount) {
+                    setSelectedIndex(index);
+                }
                 setOpen(false);
+                return true;
             }
+            // A click anywhere else closes the list and is swallowed, so the
+            // control underneath the cursor does not react to it as well.
+            setOpen(false);
             return true;
         }
 
