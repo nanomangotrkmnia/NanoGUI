@@ -1,1 +1,0 @@
-/Users/nanomango/Documents/NanoArray/native/font-renderer/target/release/libnanoarray_font.rlib: /Users/nanomango/Documents/NanoArray/native/font-renderer/src/atlas.rs /Users/nanomango/Documents/NanoArray/native/font-renderer/src/font.rs /Users/nanomango/Documents/NanoArray/native/font-renderer/src/jni.rs /Users/nanomango/Documents/NanoArray/native/font-renderer/src/lib.rs
