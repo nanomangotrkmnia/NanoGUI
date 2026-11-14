@@ -283,7 +283,7 @@ public final class Gui {
         backend.endFrame(renderContext);
 
         if (fade < 255) {
-            // The fade is applied by the host screen, see NanoArrayScreen.
+            // The fade is applied by the host screen, see NanoGUIScreen.
         }
         dirty = false;
         input.endFrame();

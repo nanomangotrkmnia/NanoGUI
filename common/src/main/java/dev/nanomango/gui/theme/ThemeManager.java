@@ -10,8 +10,8 @@ import java.util.Map;
  */
 public final class ThemeManager {
 
-    public static final String DARK_ID = "nanoarray.dark";
-    public static final String LIGHT_ID = "nanoarray.light";
+    public static final String DARK_ID = "nanogui.dark";
+    public static final String LIGHT_ID = "nanogui.light";
 
     private final Map<String, Theme> themes = new LinkedHashMap<>();
     private Theme current;
@@ -20,10 +20,10 @@ public final class ThemeManager {
      * Creates a theme manager with the built in dark and light themes.
      */
     public ThemeManager() {
-        Theme dark = Theme.builder(DARK_ID, "NanoArray Dark")
+        Theme dark = Theme.builder(DARK_ID, "NanoGUI Dark")
                 .dark(true)
                 .build();
-        Theme light = Theme.builder(LIGHT_ID, "NanoArray Light")
+        Theme light = Theme.builder(LIGHT_ID, "NanoGUI Light")
                 .dark(false)
                 .background(0xFFF2F4F7)
                 .surface(0xFFFFFFFF)

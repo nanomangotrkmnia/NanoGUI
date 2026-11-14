@@ -1,4 +1,4 @@
-# Developing NanoArray
+# Developing NanoGUI
 
 This document explains how the framework is put together, how to add a
 Minecraft version, how to rebuild the native font renderer and how to add a
@@ -100,7 +100,7 @@ version of the same idea because their anti-aliased fills hide the layering.
 
 ### Backends
 
-- **`MinecraftRenderBackend`** uses `NanoArrayGraphics`, a thin interface over
+- **`MinecraftRenderBackend`** uses `NanoGUIGraphics`, a thin interface over
   `GuiGraphics` (1.21.11) and `GuiGraphicsExtractor` (26.x). Glyphs are blitted
   from per-font `DynamicTexture` atlases. Text that uses Minecraft's own font is
   drawn by Minecraft.
@@ -135,7 +135,7 @@ Both share `MeasurementCache`, a bounded cache keyed by the text. That makes the
 steady state of `width()` allocation free.
 
 The atlas is rasterised at `size * rasterScale`, where `rasterScale` is the
-Minecraft GUI scale (`NanoArrayCore` passes it to `FontLoader`). Metrics and
+Minecraft GUI scale (`NanoGUICore` passes it to `FontLoader`). Metrics and
 advances are divided back into GUI units, so layout is unchanged and each glyph
 maps one to one onto physical pixels. Without this, a 13 px atlas is upscaled
 two or three times on a Retina display and the text looks soft.
@@ -218,14 +218,14 @@ Each version module:
      version is obfuscated (the 1.21.x line),
    - `fabric-loom` without a mapping line for the unobfuscated 26.x line.
 
-4. Update the client entry point (`NanoArrayClient`) and the platform adapter
-   (`NanoArrayPlatform<version>`) if the screen API moved. Compare
-   `NanoArrayPlatform1211`, `NanoArrayPlatform2612`, `NanoArrayPlatform262` and
-   `NanoArrayPlatform263`.
+4. Update the client entry point (`NanoGUIClient`) and the platform adapter
+   (`NanoGUIPlatform<version>`) if the screen API moved. Compare
+   `NanoGUIPlatform1211`, `NanoGUIPlatform2612`, `NanoGUIPlatform262` and
+   `NanoGUIPlatform263`.
 
 5. If the render API changed, add or reuse a graphics adapter. 1.21.11 uses
    `GuiGraphicsAdapter`; 26.x uses `GuiGraphicsExtractorAdapter` from
-   `versions/shared-26x`. Both implement `NanoArrayGraphics`.
+   `versions/shared-26x`. Both implement `NanoGUIGraphics`.
 
 6. Update `fabric.mod.json` if the Java requirement or the Fabric API range
    changed.
@@ -325,7 +325,7 @@ cd native/font-renderer && cargo test --release
 ```
 
 - Java tests use JUnit 5. `common/build.gradle.kts` passes the host native
-  library through `-Dnanoarray.native.path`, so the native path is exercised on
+  library through `-Dnanogui.native.path`, so the native path is exercised on
   the build machine.
 - Backends are tested against recording implementations (`RecordingNanoVG`,
   `RecordingImGui`), which assert the exact call that a draw list command
@@ -363,7 +363,7 @@ so the translation is covered without a GPU.
   `MinecraftRenderBackend`; the ImGui backend is available to hosts that can
   submit its draw list themselves. This is not hidden with a fake renderer.
 - **NanoVG needs an OpenGL context.** 26.x can run on Vulkan and 26.3 uses SDL3
-  instead of GLFW. `LwjglNanoVG` is optional and not used by `NanoArrayCore`.
+  instead of GLFW. `LwjglNanoVG` is optional and not used by `NanoGUICore`.
 - **The native font renderer is tested on macOS arm64.** The other five
   binaries are cross compiled and their architectures checked with `file`; the
   Java2D fallback covers every platform when the native library is unavailable.

@@ -24,7 +24,7 @@ class AwtFontTest {
     @Test
     @DisplayName("measuring a string returns a positive width")
     void measure() {
-        assertTrue(font.width("Hello NanoArray") > 0.0F);
+        assertTrue(font.width("Hello NanoGUI") > 0.0F);
     }
 
     @Test
@@ -122,7 +122,7 @@ class AwtFontTest {
     @Test
     @DisplayName("a raster scale keeps the logical metrics and doubles the atlas resolution")
     void rasterScale() throws Exception {
-        String text = "Hello NanoArray";
+        String text = "Hello NanoGUI";
         AwtFont scaled = new AwtFont(2, "Scaled",
                 FontLoader.read(FontLoader.INTER_REGULAR), 16.0F, java.awt.Font.PLAIN, 2.0F);
         assertEquals(font.width(text), scaled.width(text), 0.5F);

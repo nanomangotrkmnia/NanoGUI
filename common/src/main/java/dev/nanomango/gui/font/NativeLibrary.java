@@ -17,7 +17,7 @@ import java.util.Locale;
  *
  * <p>The loader searches the following locations, in order:</p>
  * <ol>
- *   <li>The directory given by the {@code nanoarray.native.path} system property.</li>
+ *   <li>The directory given by the {@code nanogui.native.path} system property.</li>
  *   <li>The library bundled in the classpath for the current platform.</li>
  *   <li>The directories listed in {@code java.library.path}.</li>
  * </ol>
@@ -25,10 +25,10 @@ import java.util.Locale;
 public final class NativeLibrary {
 
     /** Base name of the native library, without the platform prefix and suffix. */
-    public static final String LIBRARY_NAME = "nanoarray_font";
+    public static final String LIBRARY_NAME = "nanogui_font";
 
     /** System property that points at a directory containing the native library. */
-    public static final String PATH_PROPERTY = "nanoarray.native.path";
+    public static final String PATH_PROPERTY = "nanogui.native.path";
 
     private static final Object LOCK = new Object();
 
@@ -122,7 +122,7 @@ public final class NativeLibrary {
         if (stream == null) {
             return null;
         }
-        Path directory = Files.createTempDirectory("nanoarray-native");
+        Path directory = Files.createTempDirectory("nanogui-native");
         directory.toFile().deleteOnExit();
         Path target = directory.resolve(platform.fileName());
         target.toFile().deleteOnExit();
@@ -151,12 +151,12 @@ public final class NativeLibrary {
      */
     public enum Platform {
 
-        MACOS_X86_64("macos", "x86_64", "libnanoarray_font.dylib"),
-        MACOS_ARM64("macos", "aarch64", "libnanoarray_font.dylib"),
-        WINDOWS_X86_64("windows", "x86_64", "nanoarray_font.dll"),
-        WINDOWS_ARM64("windows", "aarch64", "nanoarray_font.dll"),
-        LINUX_X86_64("linux", "x86_64", "libnanoarray_font.so"),
-        LINUX_ARM64("linux", "aarch64", "libnanoarray_font.so");
+        MACOS_X86_64("macos", "x86_64", "libnanogui_font.dylib"),
+        MACOS_ARM64("macos", "aarch64", "libnanogui_font.dylib"),
+        WINDOWS_X86_64("windows", "x86_64", "nanogui_font.dll"),
+        WINDOWS_ARM64("windows", "aarch64", "nanogui_font.dll"),
+        LINUX_X86_64("linux", "x86_64", "libnanogui_font.so"),
+        LINUX_ARM64("linux", "aarch64", "libnanogui_font.so");
 
         private final String os;
         private final String arch;

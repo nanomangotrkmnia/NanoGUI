@@ -11,13 +11,13 @@ val lwjglVersion = providers.gradleProperty("minecraft.26_1_2.lwjgl").get()
 version = "${project.version}+mc${mcVersion}"
 
 base {
-    archivesName.set("nanoarray-$mcVersion")
+    archivesName.set("nanogui-$mcVersion")
 }
 
 loom {
     splitEnvironmentSourceSets()
 
-    val nanoArrayMod = mods.create("nanoarray")
+    val nanoArrayMod = mods.create("nanogui")
     nanoArrayMod.sourceSet(sourceSets.getByName("main"))
     nanoArrayMod.sourceSet(sourceSets.getByName("client"))
 }

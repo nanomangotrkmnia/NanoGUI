@@ -6,7 +6,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = "NanoArray"
+rootProject.name = "NanoGUI"
 
 // ---------------------------------------------------------------------------
 // Multi-version project layout
@@ -21,7 +21,7 @@ rootProject.name = "NanoArray"
 //   ./gradlew -PmcVersion=26.3 :versions:26.3:build
 //
 // Adding a new Minecraft version:
-//   1. add an entry to the `nanoarray.versions` map in gradle.properties
+//   1. add an entry to the `nanogui.versions` map in gradle.properties
 //   2. copy versions/<existing>/ into versions/<new> and adjust its build.gradle.kts
 //   3. re-run ./gradlew buildAll
 // ---------------------------------------------------------------------------

@@ -300,6 +300,14 @@ public class TextBox extends Component {
     // Rendering
     // ------------------------------------------------------------------
 
+    /**
+     * Space that subclasses reserve on the left of the text for decorations
+     * such as an icon. The text and the caret start after it.
+     */
+    protected float leftInset(GuiContext context) {
+        return 0.0F;
+    }
+
     @Override
     public void render(GuiContext context) {
         float radius = radius(context);
@@ -308,7 +316,7 @@ public class TextBox extends Component {
                 Colors.withAlphaFactor(context.theme().surfaceVariant(), 0.45F));
         context.draw().strokeRounded(x(), y(), width(), height(), radius, context.theme().borderWidth(), border);
 
-        float textX = x() + padding(context);
+        float textX = x() + padding(context) + leftInset(context);
         float textY = y() + (height() - context.font().height()) * 0.5F;
 
         if (text.isEmpty() && !placeholder.isEmpty() && !isFocused()) {

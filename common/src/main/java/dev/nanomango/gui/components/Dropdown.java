@@ -2,7 +2,6 @@ package dev.nanomango.gui.components;
 
 import dev.nanomango.gui.component.Component;
 import dev.nanomango.gui.core.GuiContext;
-import dev.nanomango.gui.util.Colors;
 import dev.nanomango.gui.util.MathUtil;
 
 import java.util.ArrayList;
@@ -111,20 +110,28 @@ public class Dropdown extends Component {
 
     private dev.nanomango.gui.core.OverlayLayer pendingOverlay;
 
+    /**
+     * The open list, drawn by the overlay and rendered separately from the
+     * closed control. Registering the whole dropdown here would paint the
+     * control a second time, on top of the list.
+     */
+    private final Popup popup = new Popup();
+
     private void contextOverlayAdd() {
         if (context != null) {
-            context.overlay().add(this);
+            popup.setContext(context);
+            context.overlay().add(popup);
         } else if (pendingOverlay != null) {
-            pendingOverlay.add(this);
+            pendingOverlay.add(popup);
         }
     }
 
     private void contextOverlayRemove() {
         if (context != null) {
-            context.overlay().remove(this);
+            context.overlay().remove(popup);
         }
         if (pendingOverlay != null) {
-            pendingOverlay.remove(this);
+            pendingOverlay.remove(popup);
         }
     }
 
@@ -134,15 +141,21 @@ public class Dropdown extends Component {
     public void attachOverlay(dev.nanomango.gui.core.OverlayLayer overlay) {
         this.pendingOverlay = overlay;
         if (open) {
-            overlay.add(this);
+            overlay.add(popup);
         }
+    }
+
+    /** The component that paints the open list. Exposed for tests. */
+    Component popupComponent() {
+        return popup;
     }
 
     @Override
     public void render(GuiContext context) {
+        layoutPopup(context);
         float radius = radius(context);
         context.draw().fillRounded(x(), y(), width(), height(), radius,
-                Colors.withAlphaFactor(context.theme().surfaceVariant(), 0.5F));
+                context.theme().surfaceVariant());
         context.draw().strokeRounded(x(), y(), width(), height(), radius, context.theme().borderWidth(),
                 open ? accentColor(context) : borderColor(context));
 
@@ -163,16 +176,6 @@ public class Dropdown extends Component {
         int arrowColor = context.theme().textMuted();
         context.draw().triangle(arrowX, arrowY, arrowX + arrowSize, arrowY, arrowX + arrowSize * 0.5F,
                 arrowY + arrowSize, arrowColor);
-
-        if (open) {
-            // The popup has to be drawn by the overlay, otherwise the next
-            // sibling in the panel paints over it. Re-add it here in case the
-            // overlay was cleared while the GUI was closed.
-            if (context.overlay() != null && !context.overlay().components().contains(this)) {
-                context.overlay().add(this);
-            }
-            renderPopup(context);
-        }
     }
 
     /**
@@ -183,21 +186,10 @@ public class Dropdown extends Component {
     }
 
     protected void renderPopup(GuiContext context) {
-        float row = rowHeight > 0.0F ? rowHeight : Math.max(context.theme().controlHeight(), context.font().height() + 8.0F);
-        int visible = Math.min(options.size(), Math.max(1, maxVisibleItems));
+        layoutPopup(context);
         float popupWidth = width();
-        float popupHeight = visible * row + 4.0F;
+        float popupHeight = popupVisibleCount * popupRowHeight + 4.0F;
         float popupX = x();
-        float targetY = y() + height() + 2.0F;
-
-        // Keep the popup inside the viewport.
-        float viewportHeight = context.viewportHeight();
-        if (targetY + popupHeight > viewportHeight) {
-            targetY = Math.max(0.0F, y() - popupHeight - 2.0F);
-        }
-        this.popupY = targetY;
-        this.popupRowHeight = row;
-        this.popupVisibleCount = visible;
 
         context.draw().shadow(popupX, popupY, popupWidth, popupHeight, radius(context),
                 context.theme().shadowBlur(), context.theme().shadow());
@@ -206,18 +198,80 @@ public class Dropdown extends Component {
         context.draw().strokeRounded(popupX, popupY, popupWidth, popupHeight, radius(context),
                 context.theme().borderWidth(), borderColor(context));
 
-        for (int i = 0; i < visible; i++) {
+        for (int i = 0; i < popupVisibleCount; i++) {
             int index = i;
-            float rowY = popupY + 2.0F + i * row;
+            float rowY = popupY + 2.0F + i * popupRowHeight;
             boolean hovered = context.mouseX() >= popupX && context.mouseX() < popupX + popupWidth
-                    && context.mouseY() >= rowY && context.mouseY() < rowY + row;
+                    && context.mouseY() >= rowY && context.mouseY() < rowY + popupRowHeight;
             if (hovered) {
-                context.draw().fillRounded(popupX + 2.0F, rowY, popupWidth - 4.0F, row, radius(context) * 0.6F,
-                        context.theme().selection());
+                context.draw().fillRounded(popupX + 2.0F, rowY, popupWidth - 4.0F, popupRowHeight,
+                        radius(context) * 0.6F, context.theme().selection());
             }
             int color = index == selectedIndex ? accentColor(context) : textColor(context);
-            float textY = rowY + (row - context.font().height()) * 0.5F;
+            float textY = rowY + (popupRowHeight - context.font().height()) * 0.5F;
             context.draw().text(popupX + padding(context), textY, context.font().id(), options.get(index), color);
+        }
+    }
+
+    /**
+     * Refreshes the popup geometry from the current theme and font. Both the
+     * control and the overlay call this before using the popup bounds.
+     */
+    protected void layoutPopup(GuiContext context) {
+        float row = rowHeight > 0.0F ? rowHeight
+                : Math.max(context.theme().controlHeight(), context.font().height() + 8.0F);
+        int visible = Math.min(options.size(), Math.max(1, maxVisibleItems));
+
+        this.popupRowHeight = row;
+        this.popupVisibleCount = visible;
+        // The list always opens below the control. Flipping it above moved the
+        // options onto the widget itself and made the control look covered.
+        this.popupY = y() + height() + 2.0F;
+    }
+
+    private boolean insidePopup(double mouseX, double mouseY) {
+        if (popupVisibleCount <= 0) {
+            return false;
+        }
+        float popupHeight = popupVisibleCount * popupRowHeight + 4.0F;
+        return mouseX >= x() && mouseX < x() + width()
+                && mouseY >= popupY && mouseY < popupY + popupHeight;
+    }
+
+    /**
+     * Draws the open list through the overlay. The dropdown control itself is
+     * not part of the overlay, so it cannot be painted over the list.
+     */
+    private final class Popup extends Component {
+
+        @Override
+        public void render(GuiContext context) {
+            if (open) {
+                renderPopup(context);
+            }
+        }
+
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (!open || !insidePopup(mouseX, mouseY)) {
+                return false;
+            }
+            int index = (int) ((mouseY - popupY - 2.0F) / popupRowHeight);
+            if (index >= 0 && index < popupVisibleCount) {
+                setSelectedIndex(index);
+                setOpen(false);
+            }
+            return true;
+        }
+
+        @Override
+        public boolean mouseReleased(double mouseX, double mouseY, int button) {
+            return open && insidePopup(mouseX, mouseY);
+        }
+
+        @Override
+        public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+            return open && insidePopup(mouseX, mouseY);
         }
     }
 

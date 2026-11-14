@@ -1,4 +1,4 @@
-# NanoArray
+# NanoGUI
 
 A client GUI framework for Fabric. One shared Java code base with a small
 adapter per Minecraft version.
@@ -15,7 +15,7 @@ Supported versions: 1.21.11, 26.1.2, 26.2, 26.3.
   JNI when its library loads, otherwise Java2D. Both share a measurement cache.
 - Input goes through one `InputState`. The root covers the viewport, so clicks
   cannot reach the world. Closing the GUI resets held keys.
-- Themes are immutable and saved to `.minecraft/config/nanoarray.json`. A
+- Themes are immutable and saved to `.minecraft/config/nanogui.json`. A
   corrupt file is moved to `.broken` and the client still starts.
 
 ## requirements
@@ -71,12 +71,12 @@ cd native/font-renderer && cargo test --release
 
 1. Install Fabric Loader for the matching Minecraft version.
 2. Put Fabric API in `mods/`.
-3. Put `nanoarray-<minecraft>-<version>.jar` in `mods/`.
+3. Put `nanogui-<minecraft>-<version>.jar` in `mods/`.
 4. Press Right Shift in game to open the GUI. Escape closes it.
 
 ## config
 
-Settings are saved to `.minecraft/config/nanoarray.json`. The selected theme is
+Settings are saved to `.minecraft/config/nanogui.json`. The selected theme is
 stored under the `theme` key.
 
 ## notes

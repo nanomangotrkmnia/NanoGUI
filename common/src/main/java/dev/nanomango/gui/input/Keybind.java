@@ -16,7 +16,7 @@ public final class Keybind {
     private int modifiers;
 
     public Keybind(String name, int keyCode) {
-        this(name, "NanoArray", keyCode, 0);
+        this(name, "NanoGUI", keyCode, 0);
     }
 
     public Keybind(String name, String category, int keyCode) {
@@ -25,7 +25,7 @@ public final class Keybind {
 
     public Keybind(String name, String category, int keyCode, int modifiers) {
         this.name = Objects.requireNonNull(name, "name");
-        this.category = category == null ? "NanoArray" : category;
+        this.category = category == null ? "NanoGUI" : category;
         this.keyCode = keyCode;
         this.modifiers = modifiers;
     }

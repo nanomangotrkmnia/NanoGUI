@@ -21,12 +21,12 @@ DIST_DIR="$CRATE_DIR/dist"
 
 # platform-id | rust-target | output file name
 TARGETS=(
-  "macos-x86_64|x86_64-apple-darwin|libnanoarray_font.dylib"
-  "macos-aarch64|aarch64-apple-darwin|libnanoarray_font.dylib"
-  "windows-x86_64|x86_64-pc-windows-gnu|nanoarray_font.dll"
-  "windows-aarch64|aarch64-pc-windows-msvc|nanoarray_font.dll"
-  "linux-x86_64|x86_64-unknown-linux-gnu|libnanoarray_font.so"
-  "linux-aarch64|aarch64-unknown-linux-gnu|libnanoarray_font.so"
+  "macos-x86_64|x86_64-apple-darwin|libnanogui_font.dylib"
+  "macos-aarch64|aarch64-apple-darwin|libnanogui_font.dylib"
+  "windows-x86_64|x86_64-pc-windows-gnu|nanogui_font.dll"
+  "windows-aarch64|aarch64-pc-windows-msvc|nanogui_font.dll"
+  "linux-x86_64|x86_64-unknown-linux-gnu|libnanogui_font.so"
+  "linux-aarch64|aarch64-unknown-linux-gnu|libnanogui_font.so"
 )
 
 if ! command -v cargo >/dev/null 2>&1; then

@@ -107,12 +107,12 @@ class ConfigManagerTest {
         Path file = directory.resolve("valid.json");
         ConfigManager config = new ConfigManager(file);
         config.load();
-        config.set("name", "NanoArray");
+        config.set("name", "NanoGUI");
         config.set("count", 5);
         config.flush();
 
         JsonObject parsed = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-        assertEquals("NanoArray", parsed.get("name").getAsString());
+        assertEquals("NanoGUI", parsed.get("name").getAsString());
         assertEquals(5, parsed.get("count").getAsInt());
     }
 

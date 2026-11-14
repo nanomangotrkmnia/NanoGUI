@@ -1,12 +1,12 @@
 [package]
-name = "nanoarray-font"
+name = "nanogui-font"
 version = "1.0.0"
 edition = "2021"
-description = "High performance font engine for the NanoArray GUI framework"
+description = "High performance font engine for the NanoGUI framework"
 license-file = "../../LICENSE"
 
 [lib]
-name = "nanoarray_font"
+name = "nanogui_font"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]

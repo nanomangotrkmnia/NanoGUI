@@ -15,7 +15,7 @@ class KeybindSelectorTest {
     @Test
     @DisplayName("binding a modifier key does not add the key as its own modifier")
     void modifierKeyIsNotItsOwnModifier() {
-        Keybind bind = new Keybind("Open", "NanoArray", Keys.UNKNOWN);
+        Keybind bind = new Keybind("Open", "NanoGUI", Keys.UNKNOWN);
         KeybindSelector selector = new KeybindSelector(bind);
         selector.startListening();
 
@@ -31,7 +31,7 @@ class KeybindSelectorTest {
     @Test
     @DisplayName("binding a regular key keeps the held modifiers")
     void regularKeyKeepsModifiers() {
-        Keybind bind = new Keybind("Open", "NanoArray", Keys.UNKNOWN);
+        Keybind bind = new Keybind("Open", "NanoGUI", Keys.UNKNOWN);
         KeybindSelector selector = new KeybindSelector(bind);
         selector.startListening();
 
@@ -45,7 +45,7 @@ class KeybindSelectorTest {
     @Test
     @DisplayName("an old binding with a redundant modifier still displays once")
     void legacyBindingDisplaysOnce() {
-        Keybind bind = new Keybind("Open", "NanoArray", Keys.RIGHT_SHIFT, Modifiers.SHIFT);
+        Keybind bind = new Keybind("Open", "NanoGUI", Keys.RIGHT_SHIFT, Modifiers.SHIFT);
         assertEquals("Right Shift", bind.displayName());
     }
 
@@ -53,7 +53,7 @@ class KeybindSelectorTest {
     @DisplayName("escape cancels the rebind")
     void escapeCancels() {
         GuiContext context = TestSupport.context();
-        Keybind bind = new Keybind("Open", "NanoArray", Keys.A);
+        Keybind bind = new Keybind("Open", "NanoGUI", Keys.A);
         KeybindSelector selector = new KeybindSelector(bind);
         selector.setContext(context);
         selector.startListening();

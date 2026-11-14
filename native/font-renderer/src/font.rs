@@ -428,7 +428,7 @@ mod tests {
             return;
         };
         let mut buffer = [0.0f32; crate::GLYPH_STRIDE * 64];
-        font.shape(b"NanoArray", &mut buffer, 64);
+        font.shape(b"NanoGUI", &mut buffer, 64);
         assert!(font.atlas().pixels().iter().any(|value| *value > 0));
         assert!(font.atlas().revision() > 1);
     }

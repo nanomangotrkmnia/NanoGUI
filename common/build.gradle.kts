@@ -2,7 +2,7 @@ plugins {
     `java-library`
 }
 
-val commonRelease = providers.gradleProperty("nanoarray.common.java.release").get().toInt()
+val commonRelease = providers.gradleProperty("nanogui.common.java.release").get().toInt()
 
 java {
     sourceCompatibility = JavaVersion.toVersion(commonRelease)
@@ -48,7 +48,7 @@ tasks.test {
     }
     val nativeDirectory = rootProject.file("native/font-renderer/dist/$hostOs-$hostArch")
     if (nativeDirectory.exists()) {
-        systemProperty("nanoarray.native.path", nativeDirectory.absolutePath)
+        systemProperty("nanogui.native.path", nativeDirectory.absolutePath)
     }
 }
 
@@ -78,7 +78,7 @@ tasks.register<JavaExec>("benchmark") {
     }
     val nativeDirectory = rootProject.file("native/font-renderer/dist/$hostOs-$hostArch")
     if (nativeDirectory.exists()) {
-        systemProperty("nanoarray.native.path", nativeDirectory.absolutePath)
+        systemProperty("nanogui.native.path", nativeDirectory.absolutePath)
     }
 }
 

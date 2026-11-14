@@ -27,13 +27,13 @@ public final class FontBenchmark {
      */
     public static void main(String[] args) throws Exception {
         byte[] data = FontLoader.read(FontLoader.INTER_REGULAR);
-        String text = "NanoArray performance probe 1234567890";
+        String text = "NanoGUI performance probe 1234567890";
 
         Font nativeFont = new NativeFont(0, "Inter (native)", data, 16.0F);
         Font fallback = new AwtFont(1, "Inter (Java2D)", data, 16.0F, java.awt.Font.PLAIN);
 
         System.out.println();
-        System.out.println("NanoArray font benchmark");
+        System.out.println("NanoGUI font benchmark");
         System.out.println("========================");
         System.out.println("text length      : " + text.length() + " characters");
         System.out.println("measured width   : native=" + nativeFont.width(text)

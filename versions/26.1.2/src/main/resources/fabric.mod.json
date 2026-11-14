@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "nanoarray",
+  "id": "nanogui",
   "version": "${version}",
-  "name": "NanoArray",
+  "name": "NanoGUI",
   "description": "A modern, high performance, multi-version Minecraft GUI framework.",
   "authors": [
     "NanoMango"
@@ -12,7 +12,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "dev.nanomango.nanoarray.NanoArrayClient"
+      "dev.nanomango.nanogui.NanoGUIClient"
     ]
   },
   "depends": {

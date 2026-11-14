@@ -38,7 +38,7 @@ class NativeFontTest {
     @Test
     @DisplayName("measuring a string returns a positive width")
     void measure() {
-        float width = font.width("Hello NanoArray");
+        float width = font.width("Hello NanoGUI");
         assertTrue(width > 0.0F, "the width must be positive");
     }
 
@@ -78,7 +78,7 @@ class NativeFontTest {
     @Test
     @DisplayName("the shaped glyphs stay inside the measured width")
     void shapeStaysInBounds() {
-        String text = "Hello NanoArray";
+        String text = "Hello NanoGUI";
         RecordingSink sink = new RecordingSink();
         font.draw(sink, text, 0.0F, 0.0F, 0xFFFFFFFF);
 
@@ -150,7 +150,7 @@ class NativeFontTest {
     @DisplayName("the native renderer is at least as fast as the Java fallback")
     void performance() {
         Font fallback = TestSupport.fallbackFont(16.0F);
-        String text = "NanoArray performance probe 1234567890";
+        String text = "NanoGUI performance probe 1234567890";
 
         // Warm up both implementations so that the JIT can optimise them.
         for (int i = 0; i < 200; i++) {
@@ -174,7 +174,7 @@ class NativeFontTest {
         Font fallback = TestSupport.fallbackFont(16.0F);
         String[] samples = {
                 "Hello",
-                "NanoArray performance probe 1234567890",
+                "NanoGUI performance probe 1234567890",
                 "Wide Wg. 123",
                 "äöü ÄÖÜ ß",
         };
@@ -226,7 +226,7 @@ class NativeFontTest {
     @Test
     @DisplayName("a raster scale keeps the logical metrics and doubles the atlas resolution")
     void rasterScale() throws Exception {
-        String text = "Hello NanoArray";
+        String text = "Hello NanoGUI";
         NativeFont scaled = new NativeFont(9, "Scaled",
                 FontLoader.read(FontLoader.INTER_REGULAR), 16.0F, 2.0F);
         try {

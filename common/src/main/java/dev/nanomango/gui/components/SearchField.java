@@ -43,6 +43,14 @@ public class SearchField extends TextBox {
     }
 
     @Override
+    protected float leftInset(GuiContext context) {
+        // Room for the magnifier so that the placeholder and the text never
+        // start underneath it.
+        float size = context.theme().iconSize() * 0.8F;
+        return size * 0.9F + context.theme().spacing() * 0.5F;
+    }
+
+    @Override
     public void render(GuiContext context) {
         super.render(context);
 

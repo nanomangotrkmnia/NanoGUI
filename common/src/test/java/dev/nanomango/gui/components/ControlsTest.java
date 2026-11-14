@@ -345,10 +345,37 @@ class ControlsTest {
         dropdown.setContext(context);
         dropdown.setOpen(true);
 
-        assertTrue(context.overlay().components().contains(dropdown),
+        assertTrue(context.overlay().components().contains(dropdown.popupComponent()),
                 "the popup must be drawn above its siblings");
+        assertFalse(context.overlay().components().contains(dropdown),
+                "the control must not be repainted by the overlay");
 
         dropdown.setOpen(false);
-        assertFalse(context.overlay().components().contains(dropdown));
+        assertFalse(context.overlay().components().contains(dropdown.popupComponent()));
+    }
+
+    @Test
+    @DisplayName("the dropdown list opens below the control even near the bottom edge")
+    void dropdownStaysBelow() {
+        Dropdown dropdown = new Dropdown().options("A", "B", "C");
+        dropdown.setBounds(10.0F, 260.0F, 120.0F, 24.0F);
+        dropdown.setContext(context);
+        dropdown.setOpen(true);
+        dropdown.render(context);
+
+        assertEquals(260.0F + 24.0F + 2.0F, dropdown.popupY,
+                "the options must stay under the control instead of flipping above it");
+    }
+
+    @Test
+    @DisplayName("the search field keeps its text clear of the icon")
+    void searchFieldLeavesRoomForIcon() {
+        SearchField field = new SearchField();
+        field.setBounds(0.0F, 0.0F, 200.0F, 24.0F);
+        field.setContext(context);
+
+        float iconSize = context.theme().iconSize() * 0.8F;
+        assertTrue(field.leftInset(context) >= iconSize * 0.9F,
+                "the text has to start after the icon");
     }
 }

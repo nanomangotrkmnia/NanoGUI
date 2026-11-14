@@ -1,4 +1,4 @@
-//! High performance font engine for the NanoArray GUI framework.
+//! High performance font engine for the NanoGUI GUI framework.
 //!
 //! The crate exposes a small C ABI so that it can be used from Java through
 //! JNI without any additional glue code. Everything is implemented in pure
@@ -17,7 +17,7 @@
 //!
 //! ```no_run
 //! let bytes = std::fs::read("font.ttf").unwrap();
-//! let mut font = nanoarray_font::FontHandle::new(bytes, 16.0).unwrap();
+//! let mut font = nanogui_font::FontHandle::new(bytes, 16.0).unwrap();
 //! let mut quads = [0.0f32; 8 * 64];
 //! let count = font.shape(b"Hello", &mut quads, 64);
 //! assert!(count > 0);

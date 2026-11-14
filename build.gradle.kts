@@ -4,8 +4,8 @@ plugins {
 }
 
 allprojects {
-    group = providers.gradleProperty("nanoarray.group").get()
-    version = providers.gradleProperty("nanoarray.version").get()
+    group = providers.gradleProperty("nanogui.group").get()
+    version = providers.gradleProperty("nanogui.version").get()
 }
 
 subprojects {
@@ -19,11 +19,11 @@ subprojects {
  * Builds every supported Minecraft version in one invocation.
  *
  * `./gradlew buildAll` produces:
- *   versions/<mc>/build/libs/nanoarray-<mc>-<version>.jar
+ *   versions/<mc>/build/libs/nanogui-<mc>-<version>.jar
  */
 tasks.register("buildAll") {
     group = "build"
-    description = "Builds NanoArray for every supported Minecraft version."
+    description = "Builds NanoGUI for every supported Minecraft version."
     dependsOn(subprojects.filter { it.path.startsWith(":versions:") }.map { "${it.path}:build" })
 }
 
@@ -32,7 +32,7 @@ tasks.register("buildAll") {
  */
 tasks.register("testAll") {
     group = "verification"
-    description = "Runs the NanoArray test suite for every supported Minecraft version."
+    description = "Runs the NanoGUI test suite for every supported Minecraft version."
     dependsOn(subprojects.filter { it.path.startsWith(":versions:") }.map { "${it.path}:test" })
 }
 
@@ -59,12 +59,12 @@ tasks.register("checkNative") {
     description = "Checks that the native font renderer exists for every supported platform."
     val dist = rootProject.layout.projectDirectory.dir("native/font-renderer/dist")
     val expected = listOf(
-        "macos-x86_64/libnanoarray_font.dylib",
-        "macos-aarch64/libnanoarray_font.dylib",
-        "windows-x86_64/nanoarray_font.dll",
-        "windows-aarch64/nanoarray_font.dll",
-        "linux-x86_64/libnanoarray_font.so",
-        "linux-aarch64/libnanoarray_font.so",
+        "macos-x86_64/libnanogui_font.dylib",
+        "macos-aarch64/libnanogui_font.dylib",
+        "windows-x86_64/nanogui_font.dll",
+        "windows-aarch64/nanogui_font.dll",
+        "linux-x86_64/libnanogui_font.so",
+        "linux-aarch64/libnanogui_font.so",
     )
     doLast {
         val missing = expected.filter { !dist.file(it).asFile.exists() }
