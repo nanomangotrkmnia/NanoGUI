@@ -124,13 +124,20 @@ public final class NanoArrayCore implements GuiHost {
                 Minecraft.getInstance().font);
         gui.fonts().register(minecraftFont);
 
+        // The GUI is laid out in GUI units, but on a Retina display (and at
+        // every Minecraft GUI scale above one) a GUI unit covers several
+        // physical pixels. Rasterising the atlas at that density is what keeps
+        // text sharp instead of upscaled.
+        float rasterScale = Math.max(1.0F, Minecraft.getInstance().getWindow().getGuiScale());
+        gui.pixelScale(rasterScale);
+
         try {
             Font regular = FontLoader.create(REGULAR_FONT_ID, "Inter",
-                    FontLoader.INTER_REGULAR, FONT_SIZE, java.awt.Font.PLAIN);
+                    FontLoader.INTER_REGULAR, FONT_SIZE, java.awt.Font.PLAIN, rasterScale);
             Font medium = FontLoader.create(MEDIUM_FONT_ID, "Inter Medium",
-                    FontLoader.INTER_MEDIUM, FONT_SIZE, java.awt.Font.BOLD);
+                    FontLoader.INTER_MEDIUM, FONT_SIZE, java.awt.Font.BOLD, rasterScale);
             Font bold = FontLoader.create(BOLD_FONT_ID, "Inter Bold",
-                    FontLoader.INTER_BOLD, FONT_SIZE, java.awt.Font.BOLD);
+                    FontLoader.INTER_BOLD, FONT_SIZE, java.awt.Font.BOLD, rasterScale);
 
             gui.fonts().register(regular);
             gui.fonts().register(medium);

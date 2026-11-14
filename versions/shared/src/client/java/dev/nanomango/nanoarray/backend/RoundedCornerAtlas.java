@@ -51,17 +51,23 @@ public final class RoundedCornerAtlas {
         return sprite("stroke/" + r + "/" + t, r, t, true);
     }
 
-    private Sprite sprite(String key, int radius, int thickness, boolean outline) {
+    private Sprite sprite(String baseKey, int radius, int thickness, boolean outline) {
+        // Generate the corners at the physical display resolution. They are
+        // then blitted into a radius sized GUI rectangle, so every sprite
+        // pixel lands on exactly one device pixel on a Retina display.
+        int scale = pixelScale();
+        String key = baseKey + "/" + scale;
         Sprite cached = sprites.get(key);
         if (cached != null) {
             return cached;
         }
 
-        int width = CornerSprites.textureWidth(radius);
-        int height = CornerSprites.textureHeight(radius);
+        int cell = radius * scale;
+        int width = CornerSprites.textureWidth(cell);
+        int height = CornerSprites.textureHeight(cell);
         int[] pixels = outline
-                ? CornerSprites.generateStroke(radius, thickness)
-                : CornerSprites.generateFill(radius);
+                ? CornerSprites.generateStroke(cell, thickness * scale)
+                : CornerSprites.generateFill(cell);
 
         Identifier identifier = Identifier.fromNamespaceAndPath(NAMESPACE, "rounded/" + key);
         DynamicTexture texture = new DynamicTexture(() -> "NanoArray Rounded Corners", width, height, false);
@@ -78,9 +84,20 @@ public final class RoundedCornerAtlas {
 
         Minecraft.getInstance().getTextureManager().register(identifier, texture);
 
-        Sprite sprite = new Sprite(identifier, texture, width, height, radius);
+        Sprite sprite = new Sprite(identifier, texture, width, height, cell);
         sprites.put(key, sprite);
         return sprite;
+    }
+
+    /**
+     * Physical pixels per GUI unit, taken from the current Minecraft window.
+     */
+    private static int pixelScale() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null) {
+            return 1;
+        }
+        return Math.max(1, minecraft.getWindow().getGuiScale());
     }
 
     /**

@@ -240,12 +240,13 @@ public final class MinecraftRenderBackend implements RenderBackend {
         int sourceWidth = Math.max(1, Math.round((u1 - u0) * textureWidth));
         int sourceHeight = Math.max(1, Math.round((v1 - v0) * textureHeight));
 
-        // Minecraft draws at integer positions, the glyph is aligned to the
-        // pixel grid so that the text does not shimmer.
-        int destinationX = (int) Math.floor(x);
-        int destinationY = (int) Math.floor(y);
-        int destinationWidth = Math.max(1, (int) Math.ceil(x + width) - destinationX);
-        int destinationHeight = Math.max(1, (int) Math.ceil(y + height) - destinationY);
+        // Minecraft draws at integer positions. The atlas is rasterised at the
+        // physical resolution, so rounding a glyph to the nearest GUI pixel
+        // keeps it one to one on screen instead of stretching it.
+        int destinationX = Math.round(x);
+        int destinationY = Math.round(y);
+        int destinationWidth = Math.max(1, Math.round(width));
+        int destinationHeight = Math.max(1, Math.round(height));
 
         graphics.blit(atlas.identifier(), sourceX, sourceY,
                 destinationX, destinationY, destinationWidth, destinationHeight,

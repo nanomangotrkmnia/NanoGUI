@@ -49,6 +49,19 @@ public interface NanoArrayGraphics {
               int textureWidth, int textureHeight, int argb);
 
     /**
+     * Draws a textured rectangle whose source and destination sizes differ.
+     *
+     * <p>Used for sprites that are rasterised at the physical display
+     * resolution and drawn in GUI units, so that they map one to one onto the
+     * device pixels.</p>
+     *
+     * @param sourceWidth  width of the source rectangle in texture pixels
+     * @param sourceHeight height of the source rectangle in texture pixels
+     */
+    void blit(Identifier texture, float u, float v, int x, int y, int width, int height,
+              int sourceWidth, int sourceHeight, int textureWidth, int textureHeight, int argb);
+
+    /**
      * Pushes a scissor rectangle. Calls have to be balanced with
      * {@link #disableScissor()}.
      */

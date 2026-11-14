@@ -51,10 +51,10 @@ public final class RoundedRectangles {
         graphics.fill(left, top + r, right, bottom - r, argb);
 
         RoundedCornerAtlas.Sprite sprite = atlas.fill(r);
-        blit(graphics, sprite, CornerSprites.TOP_LEFT, left, top, r);
-        blit(graphics, sprite, CornerSprites.TOP_RIGHT, right - r, top, r);
-        blit(graphics, sprite, CornerSprites.BOTTOM_LEFT, left, bottom - r, r);
-        blit(graphics, sprite, CornerSprites.BOTTOM_RIGHT, right - r, bottom - r, r);
+        blit(graphics, sprite, CornerSprites.TOP_LEFT, left, top, r, argb);
+        blit(graphics, sprite, CornerSprites.TOP_RIGHT, right - r, top, r, argb);
+        blit(graphics, sprite, CornerSprites.BOTTOM_LEFT, left, bottom - r, r, argb);
+        blit(graphics, sprite, CornerSprites.BOTTOM_RIGHT, right - r, bottom - r, r, argb);
     }
 
     /**
@@ -94,10 +94,10 @@ public final class RoundedRectangles {
         graphics.fill(right - t, top + r, right, bottom - r, argb);
 
         RoundedCornerAtlas.Sprite sprite = atlas.stroke(r, t);
-        blit(graphics, sprite, CornerSprites.TOP_LEFT, left, top, r);
-        blit(graphics, sprite, CornerSprites.TOP_RIGHT, right - r, top, r);
-        blit(graphics, sprite, CornerSprites.BOTTOM_LEFT, left, bottom - r, r);
-        blit(graphics, sprite, CornerSprites.BOTTOM_RIGHT, right - r, bottom - r, r);
+        blit(graphics, sprite, CornerSprites.TOP_LEFT, left, top, r, argb);
+        blit(graphics, sprite, CornerSprites.TOP_RIGHT, right - r, top, r, argb);
+        blit(graphics, sprite, CornerSprites.BOTTOM_LEFT, left, bottom - r, r, argb);
+        blit(graphics, sprite, CornerSprites.BOTTOM_RIGHT, right - r, bottom - r, r, argb);
     }
 
     /**
@@ -136,8 +136,14 @@ public final class RoundedRectangles {
     }
 
     private void blit(NanoArrayGraphics graphics, RoundedCornerAtlas.Sprite sprite,
-                      int orientation, int x, int y, int size) {
+                      int orientation, int x, int y, int size, int argb) {
+        // The sprite stores white coverage, so the colour of the rounded
+        // rectangle has to tint it. Drawing it white was why the corners of
+        // every panel stood out against the fill. The source is rasterised at
+        // the physical resolution and the destination is in GUI units, which
+        // keeps the sprite one to one on screen.
         graphics.blit(sprite.identifier(), sprite.sourceU(orientation), 0.0F,
-                x, y, size, size, sprite.textureWidth(), sprite.textureHeight(), 0xFFFFFFFF);
+                x, y, size, size, sprite.cellSize(), sprite.cellSize(),
+                sprite.textureWidth(), sprite.textureHeight(), argb);
     }
 }

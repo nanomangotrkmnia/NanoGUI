@@ -87,13 +87,21 @@ public final class Keybind {
             return "Unbound";
         }
         StringBuilder builder = new StringBuilder();
-        if ((modifiers & Modifiers.SHIFT) != 0) {
+        // A modifier key is the key itself, not a modifier of itself. Old
+        // configuration files may still contain the redundant bit.
+        boolean shift = (modifiers & Modifiers.SHIFT) != 0
+                && keyCode != Keys.LEFT_SHIFT && keyCode != Keys.RIGHT_SHIFT;
+        boolean control = (modifiers & Modifiers.CONTROL) != 0
+                && keyCode != Keys.LEFT_CONTROL && keyCode != Keys.RIGHT_CONTROL;
+        boolean alt = (modifiers & Modifiers.ALT) != 0
+                && keyCode != Keys.LEFT_ALT && keyCode != Keys.RIGHT_ALT;
+        if (shift) {
             builder.append("Shift + ");
         }
-        if ((modifiers & Modifiers.CONTROL) != 0) {
+        if (control) {
             builder.append("Ctrl + ");
         }
-        if ((modifiers & Modifiers.ALT) != 0) {
+        if (alt) {
             builder.append("Alt + ");
         }
         builder.append(Keys.name(keyCode));

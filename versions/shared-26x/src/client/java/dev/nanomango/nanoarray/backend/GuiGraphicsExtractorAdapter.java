@@ -39,6 +39,13 @@ public final class GuiGraphicsExtractorAdapter implements NanoArrayGraphics {
     }
 
     @Override
+    public void blit(Identifier texture, float u, float v, int x, int y, int width, int height,
+                     int sourceWidth, int sourceHeight, int textureWidth, int textureHeight, int argb) {
+        graphics.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
+                width, height, sourceWidth, sourceHeight, textureWidth, textureHeight, argb);
+    }
+
+    @Override
     public void enableScissor(int x1, int y1, int x2, int y2) {
         graphics.enableScissor(x1, y1, x2, y2);
     }

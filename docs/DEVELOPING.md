@@ -134,6 +134,12 @@ The `(x, y)` origin is the **top left of the line box**. The baseline is
 Both share `MeasurementCache`, a bounded cache keyed by the text. That makes the
 steady state of `width()` allocation free.
 
+The atlas is rasterised at `size * rasterScale`, where `rasterScale` is the
+Minecraft GUI scale (`NanoArrayCore` passes it to `FontLoader`). Metrics and
+advances are divided back into GUI units, so layout is unchanged and each glyph
+maps one to one onto physical pixels. Without this, a 13 px atlas is upscaled
+two or three times on a Retina display and the text looks soft.
+
 `NativeFont` calls the Rust renderer through JNI. The native side keeps a glyph
 atlas; `nShape` returns quads in the layout
 `x, y, u0, v0, u1, v1, width, height`, where `y` is relative to the **baseline**

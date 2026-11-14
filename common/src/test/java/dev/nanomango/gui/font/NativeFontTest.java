@@ -224,6 +224,37 @@ class NativeFontTest {
     }
 
     @Test
+    @DisplayName("a raster scale keeps the logical metrics and doubles the atlas resolution")
+    void rasterScale() throws Exception {
+        String text = "Hello NanoArray";
+        NativeFont scaled = new NativeFont(9, "Scaled",
+                FontLoader.read(FontLoader.INTER_REGULAR), 16.0F, 2.0F);
+        try {
+            assertEquals(font.width(text), scaled.width(text), 0.5F);
+            assertEquals(font.ascent(), scaled.ascent(), 0.5F);
+
+            RecordingSink plainSink = new RecordingSink();
+            RecordingSink scaledSink = new RecordingSink();
+            font.draw(plainSink, text, 0.0F, 0.0F, 0xFFFFFFFF);
+            scaled.draw(scaledSink, text, 0.0F, 0.0F, 0xFFFFFFFF);
+            assertEquals(plainSink.glyphs.size(), scaledSink.glyphs.size());
+
+            float plainWidth = plainSink.glyphs.get(0)[6];
+            float scaledWidth = scaledSink.glyphs.get(0)[6];
+            assertEquals(plainWidth, scaledWidth, 1.0F);
+
+            float[] plain = plainSink.glyphs.get(0);
+            float[] hiRes = scaledSink.glyphs.get(0);
+            float plainPixels = (plain[2] - plain[0]) * font.texture().width();
+            float hiResPixels = (hiRes[2] - hiRes[0]) * scaled.texture().width();
+            assertTrue(hiResPixels > plainPixels * 1.5F,
+                    "the scaled atlas must store a larger glyph: " + hiResPixels + " vs " + plainPixels);
+        } finally {
+            scaled.close();
+        }
+    }
+
+    @Test
     @DisplayName("the native renderer can be closed and reports no glyphs afterwards")
     void close() throws Exception {
         NativeFont disposable = new NativeFont(8, "Disposable",

@@ -58,6 +58,12 @@ public class Panel extends Container {
 
     @Override
     public void render(GuiContext context) {
+        // The title needs room and the children should not touch the border.
+        // Keeping the inset in the layout (instead of shifting the children
+        // only while drawing) makes hit testing line up with what is on screen.
+        if (layout() instanceof VerticalLayout vertical) {
+            vertical.padding(padding(context));
+        }
         renderPanel(context, x(), y(), width(), height(), backgroundColor(context));
         if (showTitle && !title.isEmpty()) {
             float titleY = y() + padding(context) * 0.6F;

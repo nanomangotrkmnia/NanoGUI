@@ -29,6 +29,13 @@ public final class NativeFont implements Font, AutoCloseable {
     private final int id;
     private final String name;
 
+    /**
+     * Physical pixels per GUI unit. The atlas is rasterised at
+     * {@code pixelSize * rasterScale} so that it is drawn one to one on a
+     * high density display instead of being upscaled.
+     */
+    private final float rasterScale;
+
     /** Native font handle, {@code 0} when the font could not be created. */
     private long handle;
 
@@ -66,6 +73,20 @@ public final class NativeFont implements Font, AutoCloseable {
      * @throws IllegalArgumentException when the font data cannot be parsed
      */
     public NativeFont(int id, String name, byte[] fontData, float pixelSize) {
+        this(id, name, fontData, pixelSize, 1.0F);
+    }
+
+    /**
+     * Creates a font whose atlas is rasterised for a high density display.
+     *
+     * <p>The reported metrics and advances stay in GUI units. Only the glyph
+     * atlas is rendered at the higher resolution, which keeps text sharp when
+     * Minecraft scales the GUI up on a Retina display.</p>
+     *
+     * @param rasterScale physical pixels per GUI unit, usually the Minecraft
+     *                    GUI scale
+     */
+    public NativeFont(int id, String name, byte[] fontData, float pixelSize, float rasterScale) {
         if (!NativeLibrary.load()) {
             Throwable failure = NativeLibrary.failure();
             throw new IllegalStateException("The native font renderer is not available", failure);
@@ -76,8 +97,9 @@ public final class NativeFont implements Font, AutoCloseable {
 
         this.id = id;
         this.name = name == null ? "Native" : name;
+        this.rasterScale = rasterScale > 0.0F ? rasterScale : 1.0F;
 
-        long created = nCreate(fontData, pixelSize);
+        long created = nCreate(fontData, pixelSize * this.rasterScale);
         if (created == 0) {
             throw new IllegalArgumentException("The font data could not be parsed: " + this.name);
         }
@@ -161,7 +183,7 @@ public final class NativeFont implements Font, AutoCloseable {
             return cached;
         }
         int length = encode(text);
-        float width = nMeasure(handle, utf8Buffer, length);
+        float width = nMeasure(handle, utf8Buffer, length) / rasterScale;
         measurements.put(text, width);
         return width;
     }
@@ -189,7 +211,7 @@ public final class NativeFont implements Font, AutoCloseable {
         if (handle == 0) {
             return;
         }
-        nSetSize(handle, pixelSize);
+        nSetSize(handle, pixelSize * rasterScale);
         readMetrics();
         measurements.clear();
     }
@@ -227,7 +249,14 @@ public final class NativeFont implements Font, AutoCloseable {
             if (width <= 0.0F || height <= 0.0F) {
                 continue;
             }
-            sink.glyph(id, id, u0, v0, u1, v1, x + glyphX, baseline + glyphY, width, height, argb);
+            // The atlas is rasterised at the physical resolution, so the
+            // glyph geometry has to be converted back into GUI units.
+            sink.glyph(id, id, u0, v0, u1, v1,
+                    x + glyphX / rasterScale,
+                    baseline + glyphY / rasterScale,
+                    width / rasterScale,
+                    height / rasterScale,
+                    argb);
         }
     }
 
@@ -256,9 +285,9 @@ public final class NativeFont implements Font, AutoCloseable {
     private void readMetrics() {
         float[] metrics = new float[3];
         nMetrics(handle, metrics);
-        this.ascent = metrics[0];
-        this.descent = metrics[1];
-        this.lineGap = metrics[2];
+        this.ascent = metrics[0] / rasterScale;
+        this.descent = metrics[1] / rasterScale;
+        this.lineGap = metrics[2] / rasterScale;
         if (this.ascent <= 0.0F) {
             this.ascent = 8.0F;
         }

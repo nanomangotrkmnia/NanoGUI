@@ -44,16 +44,28 @@ public final class FontLoader {
      */
     public static Font create(int id, String name, String resource, float pixelSize, int awtStyle)
             throws IOException {
+        return create(id, name, resource, pixelSize, awtStyle, 1.0F);
+    }
+
+    /**
+     * Creates a font from a resource and rasterises its atlas for the given
+     * display density.
+     *
+     * @param rasterScale physical pixels per GUI unit, usually the Minecraft
+     *                    GUI scale
+     */
+    public static Font create(int id, String name, String resource, float pixelSize, int awtStyle,
+                              float rasterScale) throws IOException {
         byte[] data = read(resource);
         if (NativeLibrary.load()) {
             try {
-                return new NativeFont(id, name, data, pixelSize);
+                return new NativeFont(id, name, data, pixelSize, rasterScale);
             } catch (IllegalArgumentException exception) {
                 // The native parser rejected the file, fall back to Java2D.
             }
         }
         try {
-            return new AwtFont(id, name, data, pixelSize, awtStyle);
+            return new AwtFont(id, name, data, pixelSize, awtStyle, rasterScale);
         } catch (FontFormatException exception) {
             throw new IOException("The font resource " + resource + " is not a valid font", exception);
         }
@@ -70,15 +82,27 @@ public final class FontLoader {
      */
     public static Font create(int id, String name, byte[] data, float pixelSize, int awtStyle)
             throws IOException {
+        return create(id, name, data, pixelSize, awtStyle, 1.0F);
+    }
+
+    /**
+     * Creates a font from raw bytes and rasterises its atlas for the given
+     * display density.
+     *
+     * @param rasterScale physical pixels per GUI unit, usually the Minecraft
+     *                    GUI scale
+     */
+    public static Font create(int id, String name, byte[] data, float pixelSize, int awtStyle,
+                              float rasterScale) throws IOException {
         if (NativeLibrary.load()) {
             try {
-                return new NativeFont(id, name, data, pixelSize);
+                return new NativeFont(id, name, data, pixelSize, rasterScale);
             } catch (IllegalArgumentException exception) {
                 // The native parser rejected the file, fall back to Java2D.
             }
         }
         try {
-            return new AwtFont(id, name, data, pixelSize, awtStyle);
+            return new AwtFont(id, name, data, pixelSize, awtStyle, rasterScale);
         } catch (FontFormatException exception) {
             throw new IOException("The font data is not a valid font", exception);
         }
@@ -95,9 +119,21 @@ public final class FontLoader {
      */
     public static Font[] createInterFamily(int regularId, int mediumId, int boldId, float size)
             throws IOException {
-        Font regular = create(regularId, "Inter", INTER_REGULAR, size, java.awt.Font.PLAIN);
-        Font medium = create(mediumId, "Inter Medium", INTER_MEDIUM, size, java.awt.Font.BOLD);
-        Font bold = create(boldId, "Inter Bold", INTER_BOLD, size, java.awt.Font.BOLD);
+        return createInterFamily(regularId, mediumId, boldId, size, 1.0F);
+    }
+
+    /**
+     * Creates the three weights of the bundled font family for a display
+     * density.
+     *
+     * @param rasterScale physical pixels per GUI unit, usually the Minecraft
+     *                    GUI scale
+     */
+    public static Font[] createInterFamily(int regularId, int mediumId, int boldId, float size,
+                                           float rasterScale) throws IOException {
+        Font regular = create(regularId, "Inter", INTER_REGULAR, size, java.awt.Font.PLAIN, rasterScale);
+        Font medium = create(mediumId, "Inter Medium", INTER_MEDIUM, size, java.awt.Font.BOLD, rasterScale);
+        Font bold = create(boldId, "Inter Bold", INTER_BOLD, size, java.awt.Font.BOLD, rasterScale);
         return new Font[]{regular, medium, bold};
     }
 

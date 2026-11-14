@@ -33,6 +33,10 @@ public final class AwtFont implements Font {
 
     private final int id;
     private final String name;
+
+    /** Physical pixels per GUI unit, see {@link #AwtFont(int, String, byte[], float, int, float)}. */
+    private final float rasterScale;
+
     private final java.awt.Font awtFont;
     private final FontRenderContext renderContext;
     private final Map<Integer, Glyph> glyphs = new HashMap<>();
@@ -62,11 +66,26 @@ public final class AwtFont implements Font {
      */
     public AwtFont(int id, String name, byte[] fontData, float size, int style)
             throws FontFormatException, IOException {
+        this(id, name, fontData, size, style, 1.0F);
+    }
+
+    /**
+     * Creates a font whose atlas is rasterised for a high density display.
+     *
+     * <p>Metrics and advances stay in GUI units; only the glyph bitmaps are
+     * rendered at {@code size * rasterScale} pixels.</p>
+     *
+     * @param rasterScale physical pixels per GUI unit, usually the Minecraft
+     *                    GUI scale
+     */
+    public AwtFont(int id, String name, byte[] fontData, float size, int style, float rasterScale)
+            throws FontFormatException, IOException {
         this.id = id;
         this.name = name;
+        this.rasterScale = rasterScale > 0.0F ? rasterScale : 1.0F;
         this.awtFont = java.awt.Font
                 .createFont(java.awt.Font.TRUETYPE_FONT, new java.io.ByteArrayInputStream(fontData))
-                .deriveFont(style, size);
+                .deriveFont(style, size * this.rasterScale);
         this.renderContext = new FontRenderContext(null, true, true);
         this.atlas = new BufferedImage(atlasWidth, atlasHeight, BufferedImage.TYPE_INT_ARGB);
         this.pixels = new int[atlasWidth * atlasHeight];
@@ -116,17 +135,17 @@ public final class AwtFont implements Font {
 
     @Override
     public float height() {
-        return awtFont.getLineMetrics("Ag", renderContext).getHeight();
+        return awtFont.getLineMetrics("Ag", renderContext).getHeight() / rasterScale;
     }
 
     @Override
     public float ascent() {
-        return awtFont.getLineMetrics("Ag", renderContext).getAscent();
+        return awtFont.getLineMetrics("Ag", renderContext).getAscent() / rasterScale;
     }
 
     @Override
     public float descent() {
-        return awtFont.getLineMetrics("Ag", renderContext).getDescent();
+        return awtFont.getLineMetrics("Ag", renderContext).getDescent() / rasterScale;
     }
 
     @Override
@@ -188,7 +207,7 @@ public final class AwtFont implements Font {
         GlyphVector vector = awtFont.createGlyphVector(renderContext, value);
         // The glyph position is the offset of the glyph inside the vector,
         // the advance is reported by the glyph metrics.
-        float advance = (float) vector.getGlyphMetrics(0).getAdvanceX();
+        float advance = (float) vector.getGlyphMetrics(0).getAdvanceX() / rasterScale;
 
         Rectangle2D bounds = vector.getOutline().getBounds2D();
         if (bounds.isEmpty()) {
@@ -304,8 +323,11 @@ public final class AwtFont implements Font {
                         (float) glyph.y / atlasHeight,
                         (float) (glyph.x + glyph.width) / atlasWidth,
                         (float) (glyph.y + glyph.height) / atlasHeight,
-                        cursor + glyph.offsetX, baseline + glyph.offsetY,
-                        glyph.width, glyph.height, argb);
+                        cursor + glyph.offsetX / rasterScale,
+                        baseline + glyph.offsetY / rasterScale,
+                        glyph.width / rasterScale,
+                        glyph.height / rasterScale,
+                        argb);
             }
             cursor += glyph.advance;
         }

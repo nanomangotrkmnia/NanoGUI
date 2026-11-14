@@ -230,6 +230,22 @@ public class Container extends Component {
         }
     }
 
+    /**
+     * Vertical offset between the positions that the layout assigned to the
+     * children and the positions they are drawn at.
+     *
+     * <p>Rendering shifts the children by the content offset (for example a
+     * panel title) and by the scroll offset. Hit testing has to apply exactly
+     * the same shift, otherwise clicks land on the widget above the cursor.</p>
+     */
+    private float inputOffset(GuiContext context) {
+        float offset = context == null ? 0.0F : contentOffset(context);
+        if (scrollable) {
+            offset -= scrollOffset;
+        }
+        return offset;
+    }
+
     private void renderScrollbar(GuiContext context) {
         if (!scrollable || maxScroll() <= 0.0F) {
             return;
@@ -253,12 +269,22 @@ public class Container extends Component {
         }
         if (isMouseOver(mouseX, mouseY)) {
             boolean consumed = false;
-            for (int i = children.size() - 1; i >= 0; i--) {
-                Component child = children.get(i);
-                child.setContext(context);
-                if (child.isVisible() && child.mouseClicked(mouseX, mouseY, button)) {
-                    consumed = true;
-                    break;
+            float offset = inputOffset(context);
+            if (offset != 0.0F) {
+                translateChildren(offset);
+            }
+            try {
+                for (int i = children.size() - 1; i >= 0; i--) {
+                    Component child = children.get(i);
+                    child.setContext(context);
+                    if (child.isVisible() && child.mouseClicked(mouseX, mouseY, button)) {
+                        consumed = true;
+                        break;
+                    }
+                }
+            } finally {
+                if (offset != 0.0F) {
+                    translateChildren(-offset);
                 }
             }
             if (!consumed) {
@@ -272,8 +298,18 @@ public class Container extends Component {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         boolean consumed = super.mouseReleased(mouseX, mouseY, button);
-        for (Component child : children) {
-            consumed |= child.mouseReleased(mouseX, mouseY, button);
+        float offset = inputOffset(context);
+        if (offset != 0.0F) {
+            translateChildren(offset);
+        }
+        try {
+            for (Component child : children) {
+                consumed |= child.mouseReleased(mouseX, mouseY, button);
+            }
+        } finally {
+            if (offset != 0.0F) {
+                translateChildren(-offset);
+            }
         }
         return consumed;
     }
@@ -281,8 +317,18 @@ public class Container extends Component {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         boolean consumed = false;
-        for (Component child : children) {
-            consumed |= child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        float offset = inputOffset(context);
+        if (offset != 0.0F) {
+            translateChildren(offset);
+        }
+        try {
+            for (Component child : children) {
+                consumed |= child.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+            }
+        } finally {
+            if (offset != 0.0F) {
+                translateChildren(-offset);
+            }
         }
         return consumed || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
@@ -290,8 +336,18 @@ public class Container extends Component {
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
         super.mouseMoved(mouseX, mouseY);
-        for (Component child : children) {
-            child.mouseMoved(mouseX, mouseY);
+        float offset = inputOffset(context);
+        if (offset != 0.0F) {
+            translateChildren(offset);
+        }
+        try {
+            for (Component child : children) {
+                child.mouseMoved(mouseX, mouseY);
+            }
+        } finally {
+            if (offset != 0.0F) {
+                translateChildren(-offset);
+            }
         }
     }
 
@@ -301,10 +357,20 @@ public class Container extends Component {
             scrollBy((float) -deltaY * 24.0F);
             return true;
         }
-        for (int i = children.size() - 1; i >= 0; i--) {
-            Component child = children.get(i);
-            if (child.isVisible() && child.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
-                return true;
+        float offset = inputOffset(context);
+        if (offset != 0.0F) {
+            translateChildren(offset);
+        }
+        try {
+            for (int i = children.size() - 1; i >= 0; i--) {
+                Component child = children.get(i);
+                if (child.isVisible() && child.mouseScrolled(mouseX, mouseY, deltaX, deltaY)) {
+                    return true;
+                }
+            }
+        } finally {
+            if (offset != 0.0F) {
+                translateChildren(-offset);
             }
         }
         return false;

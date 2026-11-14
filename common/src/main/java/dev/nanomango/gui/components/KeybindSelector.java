@@ -56,11 +56,24 @@ public class KeybindSelector extends Component {
             listening = false;
             return true;
         }
-        keybind.setKeyCode(keyCode);
-        keybind.setModifiers(Modifiers.fromShift(
+        int mask = Modifiers.fromShift(
                 (modifiers & Modifiers.SHIFT) != 0,
                 (modifiers & Modifiers.CONTROL) != 0,
-                (modifiers & Modifiers.ALT) != 0));
+                (modifiers & Modifiers.ALT) != 0);
+
+        // The key that is being bound is not a modifier of itself. Without
+        // this, binding Right Shift also records Shift and the control shows
+        // "Shift + Right Shift".
+        if (keyCode == Keys.LEFT_SHIFT || keyCode == Keys.RIGHT_SHIFT) {
+            mask &= ~Modifiers.SHIFT;
+        } else if (keyCode == Keys.LEFT_CONTROL || keyCode == Keys.RIGHT_CONTROL) {
+            mask &= ~Modifiers.CONTROL;
+        } else if (keyCode == Keys.LEFT_ALT || keyCode == Keys.RIGHT_ALT) {
+            mask &= ~Modifiers.ALT;
+        }
+
+        keybind.setKeyCode(keyCode);
+        keybind.setModifiers(mask);
         listening = false;
         if (onChange != null) {
             onChange.accept(keybind);

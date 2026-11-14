@@ -55,10 +55,18 @@ public abstract class AbstractNanoArrayScreen extends Screen {
     @Override
     public boolean keyPressed(KeyEvent event) {
         if (core.gui().isOpen()) {
+            // A widget that is listening for a new keybind gets the key first,
+            // so rebinding Right Shift still works.
             if (core.gui().keyPressed(event.key(), event.modifiers())) {
                 return true;
             }
-            // Every key press is consumed so that nothing leaks into the
+            // Minecraft routes key presses to the open screen and not to the
+            // key mapping, so the toggle key has to close the GUI here.
+            if (event.key() == NanoArrayKeybinds.GLFW_KEY_RIGHT_SHIFT) {
+                core.toggle();
+                return true;
+            }
+            // Every other key press is consumed so that nothing leaks into the
             // game while the GUI is open.
             return true;
         }
