@@ -3,7 +3,7 @@ name = "nanoarray-font"
 version = "1.0.0"
 edition = "2021"
 description = "High performance font engine for the NanoArray GUI framework"
-license = "MIT"
+license-file = "../../LICENSE"
 
 [lib]
 name = "nanoarray_font"
