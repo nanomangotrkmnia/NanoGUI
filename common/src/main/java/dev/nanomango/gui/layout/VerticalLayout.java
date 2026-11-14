@@ -54,13 +54,18 @@ public class VerticalLayout implements Layout {
             if (!child.isVisible()) {
                 continue;
             }
+            float childHeight = child.preferredHeight(context);
+            float childWidth = alignment == Alignment.STRETCH ? contentWidth : child.preferredWidth(context);
+            if (childHeight <= 0.0F) {
+                // An empty child (for example a notification manager without
+                // toasts) must not insert a gap between its neighbours.
+                child.setBounds(contentX, cursor, childWidth, 0.0F);
+                continue;
+            }
             if (!first) {
                 cursor += spacing;
             }
             first = false;
-
-            float childWidth = alignment == Alignment.STRETCH ? contentWidth : child.preferredWidth(context);
-            float childHeight = child.preferredHeight(context);
 
             float childX = contentX;
             switch (alignment) {

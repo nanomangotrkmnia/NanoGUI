@@ -255,9 +255,6 @@ impl FontHandle {
         if self.glyphs.contains_key(&key) {
             return;
         }
-        if self.atlas.is_full() {
-            return;
-        }
 
         let px_scale = PxScale::from(self.size);
         let glyph = Glyph {
@@ -298,11 +295,64 @@ impl FontHandle {
             coverage,
         };
 
-        if let Some((x, y)) = self.atlas.allocate(width, height) {
-            self.atlas.blit(x, y, &bitmap);
-            self.positions.insert(key, (x, y));
+        // A full atlas must never drop a glyph: a missing letter shows up as
+        // a hole in the text, which looks like broken letter spacing.
+        let mut placed = self.store_glyph(key, &bitmap);
+        while !placed {
+            if !self.grow_atlas() {
+                break;
+            }
+            placed = self.store_glyph(key, &bitmap);
         }
-        self.glyphs.insert(key, bitmap);
+        if placed {
+            self.glyphs.insert(key, bitmap);
+        }
+    }
+
+    /// Copies a bitmap into the atlas and records where it landed.
+    fn store_glyph(&mut self, key: u64, bitmap: &GlyphBitmap) -> bool {
+        match self.atlas.allocate(bitmap.width, bitmap.height) {
+            Some((x, y)) => {
+                self.atlas.blit(x, y, bitmap);
+                self.positions.insert(key, (x, y));
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Doubles the atlas and packs every cached glyph into it again.
+    ///
+    /// The glyphs keep their phase, only their position inside the atlas
+    /// changes, so the text on screen is unaffected apart from the new
+    /// glyphs that can now be stored.
+    fn grow_atlas(&mut self) -> bool {
+        let mut size = self.atlas.width();
+        while size < 2048 {
+            size = (size * 2).min(2048);
+            let mut atlas = Atlas::new(size, size);
+            let mut positions = HashMap::with_capacity(self.glyphs.len());
+            let mut complete = true;
+            for (key, bitmap) in self.glyphs.iter() {
+                match atlas.allocate(bitmap.width, bitmap.height) {
+                    Some((x, y)) => {
+                        atlas.blit(x, y, bitmap);
+                        positions.insert(*key, (x, y));
+                    }
+                    None => {
+                        // Not every cached glyph fits yet, try a larger page.
+                        complete = false;
+                        break;
+                    }
+                }
+            }
+            if complete {
+                self.atlas = atlas;
+                self.positions = positions;
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -335,6 +385,14 @@ unsafe impl Send for FontHandle {}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Loads the bundled Inter font at a custom size.
+    fn inter_at(size: f32) -> Option<FontHandle> {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../common/src/main/resources/fonts/Inter-Regular.ttf");
+        let data = std::fs::read(path).ok()?;
+        FontHandle::new(data, size)
+    }
 
     /// Loads the bundled Inter font. The test fails when the font is missing.
     fn inter() -> Option<FontHandle> {
@@ -445,6 +503,28 @@ mod tests {
             bottom > 0.5,
             "the descender must reach below the baseline: {bottom}"
         );
+    }
+
+    #[test]
+    fn a_full_atlas_grows_instead_of_dropping_glyphs() {
+        let Some(mut font) = inter_at(80.0) else {
+            return;
+        };
+        // The characters the interface actually uses, repeated often enough
+        // that the first atlas page cannot hold every subpixel phase.
+        let mut text = String::new();
+        for _ in 0..6 {
+            text.push_str("ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz ");
+            text.push_str("0123456789 .,:;!?()[]-+/%#@&* ");
+        }
+        let expected = text.chars().filter(|c| *c != ' ').count();
+        let mut buffer = vec![0.0f32; crate::GLYPH_STRIDE * 4096];
+        let count = font.shape(text.as_bytes(), &mut buffer, 4096);
+        let drawn = (0..count)
+            .filter(|i| buffer[i * crate::GLYPH_STRIDE + 6] > 0.0)
+            .count();
+        assert_eq!(drawn, expected, "every glyph must reach the atlas");
+        assert!(font.atlas().width() > 512, "the atlas must have grown");
     }
 
     #[test]

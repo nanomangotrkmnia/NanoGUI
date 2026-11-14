@@ -434,11 +434,15 @@ public class Container extends Component {
             if (!child.isVisible()) {
                 continue;
             }
+            float height = child.preferredHeight(context);
+            if (height <= 0.0F) {
+                continue;
+            }
             if (!first) {
                 total += layout.spacing();
             }
             first = false;
-            total += child.preferredHeight(context);
+            total += height;
         }
         return total;
     }

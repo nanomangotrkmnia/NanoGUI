@@ -144,6 +144,24 @@ class LayoutTest {
     }
 
     @Test
+    @DisplayName("a zero height child does not insert a gap")
+    void zeroHeightChild() {
+        Container container = new Container(new VerticalLayout(8.0F));
+        Component first = fixed(10.0F, 20.0F);
+        Component spacer = fixed(10.0F, 0.0F);
+        Component second = fixed(10.0F, 20.0F);
+        container.add(first);
+        container.add(spacer);
+        container.add(second);
+        container.setBounds(0.0F, 0.0F, 200.0F, 400.0F);
+        container.layout().layout(container, context);
+
+        assertEquals(0.0F, first.y());
+        assertEquals(28.0F, second.y(), 0.001F);
+        assertEquals(48.0F, container.preferredHeight(context));
+    }
+
+    @Test
     @DisplayName("the preferred height accounts for the spacing")
     void preferredHeight() {
         Container container = new Container(new VerticalLayout(8.0F));
