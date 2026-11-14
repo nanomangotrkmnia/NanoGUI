@@ -22,15 +22,50 @@ Supported versions: 1.21.11, 26.1.2, 26.2, 26.3.
 
 - JDK 21 for 1.21.11, JDK 25 for 26.x.
 - Use the included Gradle wrapper.
+- Rust, Zig and `cargo-xwin` only if you rebuild the native font renderer.
 
 ## build
 
 ```bash
+# all four versions
 ./gradlew buildAll
+
+# one version
+./gradlew -PmcVersion=26.3 buildAll
 ./gradlew -PmcVersion=26.3 :versions:26.3:build
 ```
 
-Jars are written to `versions/<minecraft>/build/libs/`.
+`-PmcVersion` accepts `1.21.11`, `26.1.2`, `26.2` or `26.3`. Only that version
+module is configured. An unknown value fails the build. Without it, all four are
+built. Jars are written to `versions/<minecraft>/build/libs/`.
+
+Other tasks:
+
+```bash
+./gradlew :common:test          # framework tests
+./gradlew testAll               # test task of every configured version
+./gradlew :common:benchmark     # native vs Java2D font timing
+./gradlew buildNative           # cross compile the native renderer
+./gradlew checkNative           # assert the six prebuilt binaries exist
+./gradlew :versions:26.3:runClient     # dev client
+./gradlew :versions:26.3:genSources    # decompile Minecraft
+```
+
+The native script also takes a single target:
+
+```bash
+./native/build-native.sh linux-x86_64
+```
+
+Targets are `macos-x86_64`, `macos-aarch64`, `windows-x86_64`,
+`windows-aarch64`, `linux-x86_64` and `linux-aarch64`. Windows on ARM64 uses
+`cargo-xwin`; the other targets use Zig as the linker.
+
+Rust unit tests:
+
+```bash
+cd native/font-renderer && cargo test --release
+```
 
 ## install
 
@@ -39,12 +74,10 @@ Jars are written to `versions/<minecraft>/build/libs/`.
 3. Put `nanoarray-<minecraft>-<version>.jar` in `mods/`.
 4. Press Right Shift in game to open the GUI. Escape closes it.
 
-## tests
+## config
 
-```bash
-./gradlew :common:test
-cd native/font-renderer && cargo test --release
-```
+Settings are saved to `.minecraft/config/nanoarray.json`. The selected theme is
+stored under the `theme` key.
 
 ## notes
 
