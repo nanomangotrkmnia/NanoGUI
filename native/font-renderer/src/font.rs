@@ -148,6 +148,17 @@ impl FontHandle {
         self.size / self.upem
     }
 
+    /// Ratio of the font's ascent + descent to its em size.
+    ///
+    /// Multiplied by the em size this yields the `PxScale` that ab_glyph
+    /// expects, see [`Self::ensure_glyph`].
+    fn height_ratio(&self) -> f32 {
+        match self.ab_font.as_ref() {
+            Some(font) => font.height_unscaled() / self.upem,
+            None => 1.0,
+        }
+    }
+
     /// Measures the advance width of a UTF-8 string in pixels.
     pub fn measure(&self, text: &[u8]) -> f32 {
         let output = self.shape_text(text);
@@ -256,7 +267,11 @@ impl FontHandle {
             return;
         }
 
-        let px_scale = PxScale::from(self.size);
+        // ab_glyph interprets `PxScale` as the font's ascent + descent, not as
+        // the em size. The shaper works in em pixels, so the rasteriser has to
+        // be given the matching value, otherwise every glyph bitmap is drawn
+        // smaller than the advance it was placed for.
+        let px_scale = PxScale::from(self.size * self.height_ratio());
         let glyph = Glyph {
             id: GlyphId(glyph_id as u16),
             scale: px_scale,
@@ -525,6 +540,37 @@ mod tests {
             .count();
         assert_eq!(drawn, expected, "every glyph must reach the atlas");
         assert!(font.atlas().width() > 512, "the atlas must have grown");
+    }
+
+    #[test]
+    fn bitmaps_match_the_scale_of_the_advances() {
+        let Some(mut font) = inter() else {
+            return;
+        };
+        let em = font.size();
+        let mut buffer = [0.0f32; crate::GLYPH_STRIDE * 8];
+        let count = font.shape(b"HTg", &mut buffer, 8);
+        assert_eq!(count, 3);
+
+        // The cap glyphs must fill the em the same way as the advances: Inter
+        // caps are 0.73 em tall. Before the fix the bitmaps were 0.83 of that.
+        let cap_height = buffer[7];
+        let ratio = cap_height / em;
+        assert!(
+            (0.68..0.78).contains(&ratio),
+            "the cap glyph must be about 0.73 em, was {ratio}"
+        );
+
+        // The advance of 'H' must be wider than its ink, but not by much.
+        let h_advance = font.measure(b"H");
+        let h_ink = buffer[6];
+        // Inter's 'H' keeps a side bearing of about 7% of an em on each side,
+        // so the ink covers roughly 0.8 of the advance. Before the fix the
+        // bitmap was scaled down as well and only covered about 0.66.
+        assert!(
+            h_ink / h_advance > 0.75,
+            "the ink of 'H' must nearly fill its advance: {h_ink} vs {h_advance}"
+        );
     }
 
     #[test]
