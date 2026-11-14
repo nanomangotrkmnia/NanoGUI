@@ -10,6 +10,7 @@ import dev.nanomango.nanoarray.backend.FontAtlasRegistry;
 import dev.nanomango.nanoarray.backend.MinecraftRenderBackend;
 import dev.nanomango.nanoarray.backend.NanoArrayGraphics;
 import dev.nanomango.nanoarray.backend.NanoArrayTextureRegistry;
+import dev.nanomango.nanoarray.backend.RoundedCornerAtlas;
 import dev.nanomango.nanoarray.font.MinecraftFont;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -44,8 +45,9 @@ public final class NanoArrayCore implements GuiHost {
     private final Gui gui = new Gui();
 
     private final FontAtlasRegistry atlases = new FontAtlasRegistry();
+    private final RoundedCornerAtlas corners = new RoundedCornerAtlas();
     private final NanoArrayTextureRegistry textures = new NanoArrayTextureRegistry();
-    private final MinecraftRenderBackend backend = new MinecraftRenderBackend(atlases);
+    private final MinecraftRenderBackend backend = new MinecraftRenderBackend(atlases, corners);
 
     private NanoArrayPlatform platform;
     private ConfigManager configManager;

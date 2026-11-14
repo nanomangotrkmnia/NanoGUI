@@ -14,8 +14,9 @@ import java.util.Deque;
  * Renders the GUI with Minecraft's own drawing primitives.
  *
  * <p>The backend is available on every supported Minecraft version and on
- * every graphics backend, including Vulkan. Rounded corners are approximated
- * with axis aligned rectangles, see {@link RoundedRectangles}.</p>
+ * every graphics backend, including Vulkan. Rounded rectangles are drawn
+ * with two plain rectangles and four anti-aliased corner sprites, see
+ * {@link RoundedRectangles}.</p>
  *
  * <p>Text is drawn in two different ways. The Minecraft font is rendered by
  * Minecraft itself, the rasterising fonts of the framework (the native
@@ -27,6 +28,7 @@ public final class MinecraftRenderBackend implements RenderBackend {
 
     private NanoArrayGraphics graphics;
     private final FontAtlasRegistry atlases;
+    private final RoundedRectangles rounded;
     private final Deque<int[]> scissorStack = new ArrayDeque<>();
 
     /** Registry of the fonts of the current frame. */
@@ -35,8 +37,9 @@ public final class MinecraftRenderBackend implements RenderBackend {
     /** Resolves the numeric texture ids of the draw list. */
     private TextureResolver textureResolver;
 
-    public MinecraftRenderBackend(FontAtlasRegistry atlases) {
+    public MinecraftRenderBackend(FontAtlasRegistry atlases, RoundedCornerAtlas corners) {
         this.atlases = atlases;
+        this.rounded = new RoundedRectangles(corners);
     }
 
     /**
@@ -92,7 +95,7 @@ public final class MinecraftRenderBackend implements RenderBackend {
                     float h = commands.floatAt(floatCursor++);
                     float radius = commands.floatAt(floatCursor++);
                     int color = commands.intAt(intCursor++);
-                    RoundedRectangles.draw(graphics, x, y, w, h, radius, color);
+                    rounded.draw(graphics, x, y, w, h, radius, color);
                 }
                 case DrawList.OP_FILL_GRADIENT -> {
                     float x = commands.floatAt(floatCursor++);
@@ -113,7 +116,7 @@ public final class MinecraftRenderBackend implements RenderBackend {
                     float radius = commands.floatAt(floatCursor++);
                     float thickness = commands.floatAt(floatCursor++);
                     int color = commands.intAt(intCursor++);
-                    RoundedRectangles.stroke(graphics, x, y, w, h, radius, thickness, color);
+                    rounded.stroke(graphics, x, y, w, h, radius, thickness, color);
                 }
                 case DrawList.OP_SHADOW -> {
                     float x = commands.floatAt(floatCursor++);
@@ -121,9 +124,9 @@ public final class MinecraftRenderBackend implements RenderBackend {
                     float w = commands.floatAt(floatCursor++);
                     float h = commands.floatAt(floatCursor++);
                     float radius = commands.floatAt(floatCursor++);
-                    commands.floatAt(floatCursor++); // blur
+                    float blur = commands.floatAt(floatCursor++);
                     int color = commands.intAt(intCursor++);
-                    RoundedRectangles.draw(graphics, x, y, w, h, radius, color);
+                    rounded.shadow(graphics, x, y, w, h, radius, blur, color);
                 }
                 case DrawList.OP_TEXT -> {
                     float x = commands.floatAt(floatCursor++);
