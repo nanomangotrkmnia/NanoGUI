@@ -17,9 +17,6 @@ import java.util.function.IntConsumer;
  */
 public class ColorPicker extends Component {
 
-    /** Number of gradient columns used for the spectrum square. */
-    private static final int SPECTRUM_COLUMNS = 64;
-
     private int color = 0xFF4C8DFF;
     private IntConsumer onChange;
     private boolean open;
@@ -95,16 +92,31 @@ public class ColorPicker extends Component {
         float squareX = squareX();
         float squareY = squareY();
         float size = squareSize();
-        float columnWidth = size / SPECTRUM_COLUMNS;
 
         // Hue is horizontal, saturation is vertical. Every column runs from
         // white at the top to the pure hue at the bottom, so the square holds
-        // every RGB colour at full brightness.
-        for (int i = 0; i < SPECTRUM_COLUMNS; i++) {
-            float columnHue = (float) i / (SPECTRUM_COLUMNS - 1);
-            int pure = Colors.hsv(columnHue * 360.0F, 1.0F, 1.0F, 1.0F);
-            context.draw().fillGradient(squareX + i * columnWidth, squareY,
-                    columnWidth + 1.0F, size, 0.0F, 0xFFFFFFFF, pure);
+        // every RGB colour at full brightness. Each column is clipped to the
+        // rounded silhouette of the square, and the endpoint colours of a
+        // clipped column are advanced by the clipped amount, so the gradient
+        // stays continuous while the colour never pokes out of the corners.
+        int left = Math.round(squareX);
+        int right = Math.round(squareX + size);
+        int top = Math.round(squareY);
+        int bottom = Math.round(squareY + size);
+        int height = bottom - top;
+        float corner = Math.min(radius * 0.5F, size * 0.5F);
+        for (int px = left; px < right; px++) {
+            float hue = (px - left + 0.5F) / (right - left);
+            int pure = Colors.hsv(hue * 360.0F, 1.0F, 1.0F, 1.0F);
+            float centre = px + 0.5F;
+            float offset = Math.max(left + corner - centre, centre - (right - corner));
+            float arc = offset <= 0.0F ? 0.0F : (float) (corner - Math.sqrt(corner * corner - offset * offset));
+            float fraction = Math.min(Math.round(arc) / (float) height, 0.5F);
+            int columnTop = top + Math.round(fraction * height);
+            int columnBottom = bottom - Math.round(fraction * height);
+            context.draw().fillGradient(px, columnTop, 1.0F, columnBottom - columnTop, 0.0F,
+                    Colors.mix(0xFFFFFFFF, pure, fraction),
+                    Colors.mix(pure, 0xFFFFFFFF, fraction));
         }
         context.draw().strokeRounded(squareX, squareY, size, size, radius * 0.5F,
                 context.theme().borderWidth(), borderColor(context));

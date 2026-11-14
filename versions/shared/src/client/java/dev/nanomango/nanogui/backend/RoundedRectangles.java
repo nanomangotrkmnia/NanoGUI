@@ -58,6 +58,64 @@ public final class RoundedRectangles {
     }
 
     /**
+     * Draws a rounded rectangle filled with a vertical gradient.
+     *
+     * <p>Minecraft's gradient primitive always has square corners, so the
+     * gradient is emitted one row at a time and every row is clipped to the
+     * exact silhouette of the rounded rectangle. The callers draw an
+     * anti-aliased outline on top, which covers the hard edge that the row
+     * clipping leaves behind.</p>
+     */
+    public void gradient(NanoGUIGraphics graphics, float x, float y, float width, float height,
+                         float radius, int topColor, int bottomColor) {
+        int left = Math.round(x);
+        int top = Math.round(y);
+        int right = Math.round(x + width);
+        int bottom = Math.round(y + height);
+
+        int w = right - left;
+        int h = bottom - top;
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+
+        int r = Math.min(Math.round(radius), Math.min(w / 2, h / 2));
+        if (r <= 0) {
+            graphics.fillGradient(left, top, right, bottom, topColor, bottomColor);
+            return;
+        }
+
+        for (int row = 0; row < h; row++) {
+            int inset = Math.max(inset(r, row), inset(r, h - 1 - row));
+            graphics.fill(left + inset, top + row, right - inset, top + row + 1,
+                    mix(topColor, bottomColor, (row + 0.5F) / h));
+        }
+    }
+
+    /**
+     * Horizontal inset of the rounded silhouette at the given distance from
+     * the nearest horizontal edge.
+     */
+    private static int inset(int radius, int distance) {
+        if (distance >= radius) {
+            return 0;
+        }
+        double offset = radius - Math.sqrt((double) radius * radius
+                - (double) (radius - distance) * (radius - distance));
+        return (int) Math.round(offset);
+    }
+
+    /** Linear blend between two packed colours. */
+    private static int mix(int topColor, int bottomColor, float t) {
+        t = Math.max(0.0F, Math.min(1.0F, t));
+        int alpha = Math.round((topColor >>> 24 & 0xFF) + ((bottomColor >>> 24 & 0xFF) - (topColor >>> 24 & 0xFF)) * t);
+        int red = Math.round((topColor >>> 16 & 0xFF) + ((bottomColor >>> 16 & 0xFF) - (topColor >>> 16 & 0xFF)) * t);
+        int green = Math.round((topColor >>> 8 & 0xFF) + ((bottomColor >>> 8 & 0xFF) - (topColor >>> 8 & 0xFF)) * t);
+        int blue = Math.round((topColor & 0xFF) + ((bottomColor & 0xFF) - (topColor & 0xFF)) * t);
+        return (alpha << 24) | (red << 16) | (green << 8) | blue;
+    }
+
+    /**
      * Draws the outline of a rounded rectangle.
      *
      * @param thickness the width of the outline in pixels

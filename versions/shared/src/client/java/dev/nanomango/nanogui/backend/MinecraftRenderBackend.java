@@ -106,11 +106,10 @@ public final class MinecraftRenderBackend implements RenderBackend {
                     float y = commands.floatAt(floatCursor++);
                     float w = commands.floatAt(floatCursor++);
                     float h = commands.floatAt(floatCursor++);
-                    commands.floatAt(floatCursor++); // radius, approximated
+                    float radius = commands.floatAt(floatCursor++);
                     int top = commands.intAt(intCursor++);
                     int bottom = commands.intAt(intCursor++);
-                    graphics.fillGradient(Math.round(x), Math.round(y), Math.round(x + w), Math.round(y + h),
-                            top, bottom);
+                    rounded.gradient(graphics, x, y, w, h, radius, top, bottom);
                 }
                 case DrawList.OP_STROKE_ROUNDED -> {
                     float x = commands.floatAt(floatCursor++);

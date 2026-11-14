@@ -7,7 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import dev.nanomango.gui.render.DrawList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -114,5 +119,69 @@ class ColorPickerTest {
         Colors.rgbToHsv(picker.color(), hsb);
         assertEquals(0.5F, hsb[2], 0.05F);
         assertTrue(changes.get() >= 3);
+    }
+
+    @Test
+    @DisplayName("the gradient fills stay inside the rounded corners")
+    void gradientsStayInsideTheRoundedCorners() {
+        ColorPicker picker = picker();
+        float size = squareSize();
+        float squareTop = squareY();
+        List<Gradient> gradients = gradients();
+
+        // The shade strip must be drawn as a rounded gradient, not as a
+        // square one that leaks out of its outline.
+        Gradient strip = gradients.stream()
+                .filter(gradient -> gradient.x() > size && gradient.y() >= squareTop)
+                .findFirst().orElseThrow(() -> new AssertionError("the shade strip gradient is missing"));
+        assertTrue(strip.radius() > 0.0F, "the shade strip must be drawn with rounded corners");
+
+        List<Gradient> columns = gradients.stream()
+                .filter(gradient -> gradient.x() < size && gradient.y() >= squareTop)
+                .sorted(Comparator.comparingDouble(Gradient::x))
+                .toList();
+        assertTrue(columns.size() >= size - 1, "the square must be filled column by column");
+
+        // The outermost columns are clipped to the rounded silhouette while
+        // the middle columns span the whole square.
+        Gradient first = columns.get(0);
+        assertTrue(first.y() > squareTop,
+                "the left column must start below the top edge, was " + first.y());
+        assertTrue(first.y() + first.height() < squareTop + size,
+                "the left column must end above the bottom edge");
+        Gradient middle = columns.get(columns.size() / 2);
+        assertEquals(Math.round(squareTop), middle.y(), 0.001F,
+                "a middle column must span the full height");
+
+        // The clipped column starts part way down the white to hue ramp, so
+        // its top colour must be mixed toward white instead of being pure.
+        assertTrue(Colors.green(first.top()) > 0 && Colors.blue(first.top()) > 0,
+                "the clipped column must start on the ramp, was "
+                        + Integer.toHexString(first.top()));
+    }
+
+    /** One emitted OP_FILL_GRADIENT command. */
+    private record Gradient(float x, float y, float width, float height, float radius,
+                            int top, int bottom) {
+    }
+
+    /** Collects the gradient commands of the last rendered frame. */
+    private List<Gradient> gradients() {
+        DrawList draw = context.draw();
+        List<Gradient> result = new ArrayList<>();
+        int floatCursor = 0;
+        int intCursor = 0;
+        for (int index = 0; index < draw.commandCount(); index++) {
+            int opcode = draw.opcodes(index);
+            if (opcode == DrawList.OP_FILL_GRADIENT) {
+                result.add(new Gradient(draw.floatAt(floatCursor), draw.floatAt(floatCursor + 1),
+                        draw.floatAt(floatCursor + 2), draw.floatAt(floatCursor + 3),
+                        draw.floatAt(floatCursor + 4), draw.intAt(intCursor),
+                        draw.intAt(intCursor + 1)));
+            }
+            floatCursor += DrawList.floatArgCount(opcode);
+            intCursor += DrawList.intArgCount(opcode);
+        }
+        return result;
     }
 }
