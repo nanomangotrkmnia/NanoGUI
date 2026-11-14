@@ -221,6 +221,10 @@ public final class NanoGUICore implements GuiHost {
 
     /**
      * Renders the GUI with the Minecraft backend.
+     *
+     * <p>{@code partialTick} is the fraction of a game tick and not a time
+     * delta, so the frame time is measured here instead. Passing it through
+     * made every animation and notification run at the wrong speed.</p>
      */
     public void render(NanoGUIGraphics graphics, int width, int height, float partialTick) {
         ensureFonts();
@@ -230,10 +234,20 @@ public final class NanoGUICore implements GuiHost {
         if (!gui.isOpen() && gui.openProgress() <= 0.0F) {
             return;
         }
+        long now = System.nanoTime();
+        float deltaSeconds = lastFrameNanos == 0L
+                ? 1.0F / 60.0F
+                : (now - lastFrameNanos) / 1_000_000_000.0F;
+        lastFrameNanos = now;
+        // A long pause (menu, window drag) must not fast forward the toasts.
+        deltaSeconds = Math.max(0.0F, Math.min(deltaSeconds, 0.1F));
+
         backend.graphics(graphics);
         gui.context().setTextureAspectProvider(textures::aspect);
-        gui.render(backend, partialTick, width, height, lastMouseX, lastMouseY);
+        gui.render(backend, deltaSeconds, width, height, lastMouseX, lastMouseY);
     }
+
+    private long lastFrameNanos;
 
     private double lastMouseX;
     private double lastMouseY;
