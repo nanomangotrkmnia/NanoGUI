@@ -35,9 +35,12 @@ public final class AwtFont implements Font {
     private final String name;
 
     /** Physical pixels per GUI unit, see {@link #AwtFont(int, String, byte[], float, int, float)}. */
-    private final float rasterScale;
+    private float rasterScale;
+    private final float baseSize;
+    private final int style;
 
-    private final java.awt.Font awtFont;
+    private final java.awt.Font baseFont;
+    private java.awt.Font awtFont;
     private final FontRenderContext renderContext;
     private final Map<Integer, Glyph> glyphs = new HashMap<>();
 
@@ -83,9 +86,11 @@ public final class AwtFont implements Font {
         this.id = id;
         this.name = name;
         this.rasterScale = rasterScale > 0.0F ? rasterScale : 1.0F;
-        this.awtFont = java.awt.Font
-                .createFont(java.awt.Font.TRUETYPE_FONT, new java.io.ByteArrayInputStream(fontData))
-                .deriveFont(style, size * this.rasterScale);
+        this.baseSize = size;
+        this.style = style;
+        this.baseFont = java.awt.Font
+                .createFont(java.awt.Font.TRUETYPE_FONT, new java.io.ByteArrayInputStream(fontData));
+        this.awtFont = baseFont.deriveFont(style, size * this.rasterScale);
         this.renderContext = new FontRenderContext(null, true, true);
         this.atlas = new BufferedImage(atlasWidth, atlasHeight, BufferedImage.TYPE_INT_ARGB);
         this.pixels = new int[atlasWidth * atlasHeight];
@@ -304,6 +309,29 @@ public final class AwtFont implements Font {
                 System.arraycopy(pixels, 0, argbOut, 0, Math.min(pixels.length, argbOut.length));
             }
         };
+    }
+
+    @Override
+    public float rasterScale() {
+        return rasterScale;
+    }
+
+    @Override
+    public void setRasterScale(float scale) {
+        float target = scale > 0.0F ? scale : 1.0F;
+        if (target == rasterScale) {
+            return;
+        }
+        this.rasterScale = target;
+        this.awtFont = baseFont.deriveFont(style, baseSize * target);
+        glyphs.clear();
+        measurements.clear();
+        java.util.Arrays.fill(pixels, 0);
+        penX = PADDING;
+        penY = PADDING;
+        rowHeight = 0;
+        full = false;
+        revision++;
     }
 
     @Override

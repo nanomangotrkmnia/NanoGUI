@@ -75,19 +75,17 @@ public class SearchField extends TextBox {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) {
+        // The clear button sits inside the field, so it has to be tested
+        // before the field takes the click for itself.
+        if (button == 0 && !text().isEmpty() && clearSize > 0.0F && isMouseOver(mouseX, mouseY)
+                && mouseX >= clearX && mouseX <= clearX + clearSize
+                && mouseY >= clearY && mouseY <= clearY + clearSize) {
+            setText("");
+            if (onSearch != null) {
+                onSearch.accept("");
+            }
             return true;
         }
-        if (!text().isEmpty() && isMouseOver(mouseX, mouseY) && clearSize > 0.0F) {
-            if (mouseX >= clearX && mouseX <= clearX + clearSize
-                    && mouseY >= clearY && mouseY <= clearY + clearSize) {
-                setText("");
-                if (onSearch != null) {
-                    onSearch.accept("");
-                }
-                return true;
-            }
-        }
-        return false;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 }

@@ -276,6 +276,29 @@ class NativeFontTest {
     }
 
     @Test
+    @DisplayName("changing the raster scale rebuilds the atlas and keeps the logical metrics")
+    void changeRasterScale() throws Exception {
+        NativeFont scaled = new NativeFont(11, "Rescale",
+                FontLoader.read(FontLoader.INTER_REGULAR), 16.0F, 1.0F);
+        try {
+            float width = scaled.width("Hello NanoGUI");
+            int revision = scaled.texture().revision();
+            scaled.setRasterScale(3.0F);
+            assertEquals(3.0F, scaled.rasterScale());
+            assertEquals(width, scaled.width("Hello NanoGUI"), 0.5F);
+
+            RecordingSink sink = new RecordingSink();
+            scaled.draw(sink, "Hello", 0.0F, 0.0F, 0xFFFFFFFF);
+            assertTrue(scaled.texture().revision() != revision, "the atlas must be re-uploaded");
+            for (float[] glyph : sink.glyphs) {
+                assertEquals(Math.round(glyph[4] * 3.0F), glyph[4] * 3.0F, 0.001F);
+            }
+        } finally {
+            scaled.close();
+        }
+    }
+
+    @Test
     @DisplayName("long text is encoded before the buffer is read")
     void longTextAfterShortText() {
         RecordingSink sink = new RecordingSink();

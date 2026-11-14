@@ -25,6 +25,10 @@ public class TextBox extends Component {
     private int maxLength = 32767;
     private char passwordChar = '•';
 
+    /** Left edge of the text from the last frame, used to map clicks to carets. */
+    private float lastTextX;
+    private boolean dragging;
+
     public TextBox() {
     }
 
@@ -297,6 +301,65 @@ public class TextBox extends Component {
     }
 
     // ------------------------------------------------------------------
+    // Mouse
+    // ------------------------------------------------------------------
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!isVisible() || !isEnabled() || button != 0 || !isMouseOver(mouseX, mouseY)) {
+            return false;
+        }
+        focus();
+        caret = caretAt(mouseX);
+        selectionAnchor = caret;
+        dragging = true;
+        return true;
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (!dragging || !isFocused()) {
+            return false;
+        }
+        caret = caretAt(mouseX);
+        return true;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (!dragging) {
+            return false;
+        }
+        dragging = false;
+        if (selectionAnchor == caret) {
+            selectionAnchor = -1;
+        }
+        return true;
+    }
+
+    /**
+     * Index of the character boundary that is closest to a horizontal
+     * position.
+     */
+    private int caretAt(double mouseX) {
+        if (context() == null) {
+            return text.length();
+        }
+        String display = password ? repeat(passwordChar, text.length()) : text;
+        float local = (float) mouseX - lastTextX;
+        int best = 0;
+        float bestDistance = Math.abs(local);
+        for (int i = 1; i <= display.length(); i++) {
+            float distance = Math.abs(local - context().font().width(display.substring(0, i)));
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    // ------------------------------------------------------------------
     // Rendering
     // ------------------------------------------------------------------
 
@@ -318,6 +381,7 @@ public class TextBox extends Component {
 
         float textX = x() + padding(context) + leftInset(context);
         float textY = y() + (height() - context.font().height()) * 0.5F;
+        lastTextX = textX;
 
         if (text.isEmpty() && !placeholder.isEmpty() && !isFocused()) {
             context.draw().text(textX, textY, context.font().id(), placeholder, context.theme().textDisabled());
@@ -325,6 +389,11 @@ public class TextBox extends Component {
         }
 
         String display = password ? repeat(passwordChar, text.length()) : text;
+        if (hasSelection()) {
+            float from = textX + context.font().width(display.substring(0, selectionStart()));
+            float to = textX + context.font().width(display.substring(0, selectionEnd()));
+            context.draw().fillRect(from, textY, to - from, context.font().height(), context.theme().selection());
+        }
         context.draw().text(textX, textY, context.font().id(), display, textColor(context));
 
         if (isFocused()) {

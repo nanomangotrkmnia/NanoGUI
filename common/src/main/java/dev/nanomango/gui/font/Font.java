@@ -71,4 +71,23 @@ public interface Font {
     default FontTexture texture() {
         return null;
     }
+
+    /**
+     * Re-rasterises the font for a new display density.
+     *
+     * <p>Called when the Minecraft GUI scale changes. Metrics and advances stay
+     * in GUI units, only the glyph atlas changes. Fonts that do not rasterise
+     * their own glyphs ignore the call.</p>
+     *
+     * @param rasterScale physical pixels per GUI unit
+     */
+    default void setRasterScale(float rasterScale) {
+    }
+
+    /**
+     * Physical pixels per GUI unit that the glyph atlas is rasterised for.
+     */
+    default float rasterScale() {
+        return 1.0F;
+    }
 }

@@ -263,6 +263,14 @@ public class Container extends Component {
     // ------------------------------------------------------------------
 
     @Override
+    public void clearFocus() {
+        super.clearFocus();
+        for (Component child : children) {
+            child.clearFocus();
+        }
+    }
+
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!isVisible() || !isEnabled()) {
             return false;

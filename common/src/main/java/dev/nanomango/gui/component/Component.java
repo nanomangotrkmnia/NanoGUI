@@ -253,6 +253,13 @@ public abstract class Component {
     protected void onFocusChanged(boolean focused) {
     }
 
+    /**
+     * Removes the keyboard focus from this component and its descendants.
+     */
+    public void clearFocus() {
+        setFocused(false);
+    }
+
     // ------------------------------------------------------------------
     // Frame lifecycle
     // ------------------------------------------------------------------

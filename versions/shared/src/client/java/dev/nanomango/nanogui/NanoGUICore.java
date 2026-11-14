@@ -242,12 +242,31 @@ public final class NanoGUICore implements GuiHost {
         // A long pause (menu, window drag) must not fast forward the toasts.
         deltaSeconds = Math.max(0.0F, Math.min(deltaSeconds, 0.1F));
 
+        syncRasterScale();
+
         backend.graphics(graphics);
         gui.context().setTextureAspectProvider(textures::aspect);
         gui.render(backend, deltaSeconds, width, height, lastMouseX, lastMouseY);
     }
 
     private long lastFrameNanos;
+
+    /**
+     * Re-rasterises the fonts when the Minecraft GUI scale changed since they
+     * were created (window resize, fullscreen, the video setting). An atlas
+     * built for another scale is resampled on screen, which is what makes the
+     * letter spacing uneven.
+     */
+    private void syncRasterScale() {
+        float scale = Math.max(1.0F, Minecraft.getInstance().getWindow().getGuiScale());
+        if (scale == gui.pixelScale()) {
+            return;
+        }
+        gui.pixelScale(scale);
+        for (Font font : gui.fonts().all()) {
+            font.setRasterScale(scale);
+        }
+    }
 
     private double lastMouseX;
     private double lastMouseY;

@@ -3,6 +3,8 @@ package dev.nanomango.gui.core;
 import dev.nanomango.gui.component.Component;
 import dev.nanomango.gui.components.Button;
 import dev.nanomango.gui.components.Dropdown;
+import dev.nanomango.gui.components.SearchField;
+import dev.nanomango.gui.components.TextBox;
 import dev.nanomango.gui.components.Text;
 import dev.nanomango.gui.render.DrawList;
 import dev.nanomango.gui.render.RenderBackend;
@@ -169,6 +171,49 @@ class GuiTest {
         float row = gui.context().theme().controlHeight();
         gui.mouseClicked(20, dropdown.height() + 2 + row * 1.5F, 0);
         assertEquals("B", dropdown.selected());
+    }
+
+    @Test
+    @DisplayName("clicking a text field focuses it and clicking elsewhere releases the focus")
+    void clickMovesFocus() {
+        SearchField search = new SearchField();
+        TextBox other = new TextBox();
+        dev.nanomango.gui.component.Container column =
+                new dev.nanomango.gui.component.Container(new dev.nanomango.gui.layout.VerticalLayout(8.0F, 8.0F));
+        column.add(search);
+        column.add(other);
+        gui.root().add(column);
+        gui.open();
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        assertTrue(gui.mouseClicked(search.x() + 30, search.y() + search.height() / 2, 0));
+        gui.mouseReleased(search.x() + 30, search.y() + search.height() / 2, 0);
+        assertTrue(search.isFocused(), "the search field must take the focus");
+        gui.charTyped('h');
+        gui.charTyped('i');
+        assertEquals("hi", search.text());
+
+        gui.mouseClicked(other.x() + 30, other.y() + other.height() / 2, 0);
+        gui.mouseReleased(other.x() + 30, other.y() + other.height() / 2, 0);
+        assertFalse(search.isFocused(), "the previous field must lose the focus");
+        assertTrue(other.isFocused());
+    }
+
+    @Test
+    @DisplayName("the clear button of the search field still works")
+    void clearButton() {
+        SearchField search = new SearchField("abc");
+        dev.nanomango.gui.component.Container column =
+                new dev.nanomango.gui.component.Container(new dev.nanomango.gui.layout.VerticalLayout(8.0F, 8.0F));
+        column.add(search);
+        gui.root().add(column);
+        gui.open();
+        gui.render(backend, 1.0F / 60.0F, 854, 480, 0, 0);
+
+        float right = search.x() + search.width() - 12.0F;
+        gui.mouseClicked(right, search.y() + search.height() / 2, 0);
+        gui.mouseReleased(right, search.y() + search.height() / 2, 0);
+        assertEquals("", search.text());
     }
 
     @Test

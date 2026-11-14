@@ -334,6 +334,13 @@ public final class Gui {
         context.setMouse(mouseX, mouseY);
         input.setButton(button, true);
 
+        // A click moves the keyboard focus: everything loses it first and the
+        // component under the cursor takes it back.
+        root.clearFocus();
+        for (Component component : overlay.components()) {
+            component.clearFocus();
+        }
+
         for (int i = overlay.components().size() - 1; i >= 0; i--) {
             Component component = overlay.components().get(i);
             if (component.mouseClicked(mouseX, mouseY, button)) {

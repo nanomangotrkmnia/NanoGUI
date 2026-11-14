@@ -34,7 +34,10 @@ public final class NativeFont implements Font, AutoCloseable {
      * {@code pixelSize * rasterScale} so that it is drawn one to one on a
      * high density display instead of being upscaled.
      */
-    private final float rasterScale;
+    private float rasterScale;
+
+    /** Size of the font in GUI units. */
+    private float baseSize;
 
     /** Native font handle, {@code 0} when the font could not be created. */
     private long handle;
@@ -98,6 +101,7 @@ public final class NativeFont implements Font, AutoCloseable {
         this.id = id;
         this.name = name == null ? "Native" : name;
         this.rasterScale = rasterScale > 0.0F ? rasterScale : 1.0F;
+        this.baseSize = pixelSize;
 
         long created = nCreate(fontData, pixelSize * this.rasterScale);
         if (created == 0) {
@@ -211,7 +215,25 @@ public final class NativeFont implements Font, AutoCloseable {
         if (handle == 0) {
             return;
         }
+        this.baseSize = pixelSize;
         nSetSize(handle, pixelSize * rasterScale);
+        readMetrics();
+        measurements.clear();
+    }
+
+    @Override
+    public float rasterScale() {
+        return rasterScale;
+    }
+
+    @Override
+    public void setRasterScale(float scale) {
+        float target = scale > 0.0F ? scale : 1.0F;
+        if (handle == 0 || target == rasterScale) {
+            return;
+        }
+        this.rasterScale = target;
+        nSetSize(handle, baseSize * target);
         readMetrics();
         measurements.clear();
     }
