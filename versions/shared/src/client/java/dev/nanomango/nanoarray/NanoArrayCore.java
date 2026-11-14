@@ -53,6 +53,7 @@ public final class NanoArrayCore implements GuiHost {
     private ConfigManager configManager;
     private Font defaultFont;
     private boolean initialized;
+    private boolean fontsRegistered;
 
     private NanoArrayCore() {
         gui.host(this);
@@ -104,12 +105,32 @@ public final class NanoArrayCore implements GuiHost {
         configManager.load();
         gui.configManager(configManager);
 
-        registerFonts();
         applyStoredTheme();
         NanoArrayKeybinds.register();
 
         NanoArrayPanels.build(gui);
         initialized = true;
+
+        // The fonts are registered on the first tick or frame. The client
+        // entrypoint runs inside the Minecraft constructor, before the window
+        // and the default font exist.
+        ensureFonts();
+    }
+
+    /**
+     * Registers the fonts once the client is far enough along that the window
+     * and the Minecraft font are available.
+     */
+    private void ensureFonts() {
+        if (fontsRegistered) {
+            return;
+        }
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft == null || minecraft.getWindow() == null || minecraft.font == null) {
+            return;
+        }
+        registerFonts();
+        fontsRegistered = true;
     }
 
     /**
@@ -167,6 +188,7 @@ public final class NanoArrayCore implements GuiHost {
         if (!initialized) {
             return;
         }
+        ensureFonts();
         if (NanoArrayKeybinds.openKey() != null && NanoArrayKeybinds.openKey().consumeClick()) {
             toggle();
         }
@@ -201,6 +223,10 @@ public final class NanoArrayCore implements GuiHost {
      * Renders the GUI with the Minecraft backend.
      */
     public void render(NanoArrayGraphics graphics, int width, int height, float partialTick) {
+        ensureFonts();
+        if (!fontsRegistered) {
+            return;
+        }
         if (!gui.isOpen() && gui.openProgress() <= 0.0F) {
             return;
         }
