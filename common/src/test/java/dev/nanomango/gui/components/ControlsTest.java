@@ -326,7 +326,7 @@ class ControlsTest {
 
         float preview = context.theme().controlHeight();
         float squareY = preview + context.theme().spacing();
-        float squareSize = Math.min(180.0F - preview - 8.0F, 100.0F);
+        float squareSize = Math.min(180.0F - preview - 8.0F, 140.0F);
 
         assertTrue(picker.mouseClicked(10.0, squareY + 10.0, 0));
         int afterClick = picker.color();
@@ -365,6 +365,24 @@ class ControlsTest {
 
         assertEquals(260.0F + 24.0F + 2.0F, dropdown.popupY,
                 "the options must stay under the control instead of flipping above it");
+    }
+
+    @Test
+    @DisplayName("the search icon is centred and the text starts after it")
+    void searchIconGeometry() {
+        SearchField field = new SearchField();
+        field.setBounds(0.0F, 0.0F, 200.0F, 24.0F);
+        field.setContext(context);
+
+        float[] icon = field.iconBounds(context);
+        assertEquals(field.y() + (field.height() - icon[2]) * 0.5F, icon[1], 0.001F,
+                "the icon ink must be centred vertically");
+        assertEquals(field.x() + context.theme().padding(), icon[0], 0.001F,
+                "the icon must start at the text padding");
+        assertTrue(field.leftInset(context) > icon[2],
+                "the text must start after the icon");
+        assertTrue(field.leftInset(context) <= icon[2] + context.theme().spacing(),
+                "the gap after the icon must not be larger than the row spacing");
     }
 
     @Test

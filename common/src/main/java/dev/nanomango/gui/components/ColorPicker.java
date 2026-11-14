@@ -8,10 +8,17 @@ import dev.nanomango.gui.util.MathUtil;
 import java.util.function.IntConsumer;
 
 /**
- * A colour picker with a hue strip, a saturation/value square and a hex
- * input field.
+ * A colour picker.
+ *
+ * <p>The large square shows every hue across its width and every saturation
+ * across its height, both at full brightness, so it contains the whole RGB
+ * spectrum. The strip on the right chooses the shade (brightness) of the
+ * selected hue and saturation.</p>
  */
 public class ColorPicker extends Component {
+
+    /** Number of gradient columns used for the spectrum square. */
+    private static final int SPECTRUM_COLUMNS = 64;
 
     private int color = 0xFF4C8DFF;
     private IntConsumer onChange;
@@ -21,10 +28,8 @@ public class ColorPicker extends Component {
     private float saturation = 1.0F;
     private float brightness = 1.0F;
 
-    private boolean draggingSquare;
-    private boolean draggingHue;
-
-    private final TextBox hexField = new TextBox();
+    private boolean draggingSpectrum;
+    private boolean draggingShade;
 
     public ColorPicker() {
         setHeight(150.0F);
@@ -46,7 +51,6 @@ public class ColorPicker extends Component {
         hue = hsb[0];
         saturation = hsb[1];
         brightness = hsb[2];
-        hexField.setText(String.format(java.util.Locale.ROOT, "%08X", color));
     }
 
     public ColorPicker onChange(IntConsumer onChange) {
@@ -64,7 +68,7 @@ public class ColorPicker extends Component {
 
     private void applyHsb() {
         int alpha = Colors.alpha(color);
-        color = Colors.withAlpha(Colors.hsv(hue, saturation, brightness, 1.0F), alpha);
+        color = Colors.withAlpha(Colors.hsv(hue * 360.0F, saturation, brightness, 1.0F), alpha);
         if (onChange != null) {
             onChange.accept(color);
         }
@@ -73,15 +77,15 @@ public class ColorPicker extends Component {
     @Override
     public void render(GuiContext context) {
         float radius = radius(context);
-        int previewSize = (int) Math.min(width(), context.theme().controlHeight());
+        float preview = previewSize();
 
-        context.draw().fillRounded(x(), y(), previewSize, previewSize, radius, color);
-        context.draw().strokeRounded(x(), y(), previewSize, previewSize, radius,
+        context.draw().fillRounded(x(), y(), preview, preview, radius, color);
+        context.draw().strokeRounded(x(), y(), preview, preview, radius,
                 context.theme().borderWidth(), borderColor(context));
 
         String label = String.format(java.util.Locale.ROOT, "#%06X", color & 0xFFFFFF);
-        float textY = y() + (previewSize - context.font().height()) * 0.5F;
-        context.draw().text(x() + previewSize + context.theme().spacing(), textY, context.font().id(), label,
+        float textY = y() + (preview - context.font().height()) * 0.5F;
+        context.draw().text(x() + preview + context.theme().spacing(), textY, context.font().id(), label,
                 textColor(context));
 
         if (!open) {
@@ -90,33 +94,43 @@ public class ColorPicker extends Component {
 
         float squareX = squareX();
         float squareY = squareY();
-        float squareSize = squareSize();
+        float size = squareSize();
+        float columnWidth = size / SPECTRUM_COLUMNS;
 
-        // Saturation / brightness square.
-        int steps = 24;
-        for (int i = 0; i < steps; i++) {
-            for (int j = 0; j < steps; j++) {
-                float s = (float) i / (steps - 1);
-                float b = 1.0F - (float) j / (steps - 1);
-                int cellColor = Colors.hsv(hue, s, b, 1.0F);
-                context.draw().fillRect(squareX + i * (squareSize / steps), squareY + j * (squareSize / steps),
-                        squareSize / steps + 1.0F, squareSize / steps + 1.0F, cellColor);
-            }
+        // Hue is horizontal, saturation is vertical. Every column runs from
+        // white at the top to the pure hue at the bottom, so the square holds
+        // every RGB colour at full brightness.
+        for (int i = 0; i < SPECTRUM_COLUMNS; i++) {
+            float columnHue = (float) i / (SPECTRUM_COLUMNS - 1);
+            int pure = Colors.hsv(columnHue * 360.0F, 1.0F, 1.0F, 1.0F);
+            context.draw().fillGradient(squareX + i * columnWidth, squareY,
+                    columnWidth + 1.0F, size, 0.0F, 0xFFFFFFFF, pure);
         }
+        context.draw().strokeRounded(squareX, squareY, size, size, radius * 0.5F,
+                context.theme().borderWidth(), borderColor(context));
 
-        // Hue strip.
+        // Shade strip: the selected colour at full brightness at the top and
+        // black at the bottom.
         float stripX = stripX();
         float stripWidth = stripWidth();
-        for (int i = 0; i < 16; i++) {
-            int hueColor = Colors.hsv(i / 16.0F, 1.0F, 1.0F, 1.0F);
-            context.draw().fillRect(stripX, squareY + i * (squareSize / 16.0F), stripWidth,
-                    squareSize / 16.0F + 1.0F, hueColor);
-        }
+        int full = Colors.hsv(hue * 360.0F, saturation, 1.0F, 1.0F);
+        context.draw().fillGradient(stripX, squareY, stripWidth, size, stripWidth * 0.5F, full, 0xFF000000);
+        context.draw().strokeRounded(stripX, squareY, stripWidth, size, stripWidth * 0.5F,
+                context.theme().borderWidth(), borderColor(context));
 
-        // Selection markers.
-        float markerX = squareX + saturation * squareSize;
-        float markerY = squareY + (1.0F - brightness) * squareSize;
-        context.draw().strokeRounded(markerX - 4.0F, markerY - 4.0F, 8.0F, 8.0F, 4.0F, 1.0F, 0xFFFFFFFF);
+        // Markers.
+        float markerX = squareX + hue * size;
+        float markerY = squareY + saturation * size;
+        ring(context, markerX, markerY, 4.0F);
+        float shadeY = squareY + (1.0F - brightness) * size;
+        context.draw().fillRounded(stripX - 1.0F, shadeY - 2.0F, stripWidth + 2.0F, 4.0F, 2.0F, 0xFFFFFFFF);
+    }
+
+    private void ring(GuiContext context, float centreX, float centreY, float radius) {
+        context.draw().strokeRounded(centreX - radius, centreY - radius, radius * 2.0F, radius * 2.0F,
+                radius, 2.0F, 0xFF000000);
+        context.draw().strokeRounded(centreX - radius + 1.0F, centreY - radius + 1.0F,
+                radius * 2.0F - 2.0F, radius * 2.0F - 2.0F, radius - 1.0F, 1.0F, 0xFFFFFFFF);
     }
 
     @Override
@@ -134,25 +148,27 @@ public class ColorPicker extends Component {
 
         float squareX = squareX();
         float squareY = squareY();
-        float squareSize = squareSize();
+        float size = squareSize();
 
-        if (mouseX >= squareX && mouseX < squareX + squareSize
-                && mouseY >= squareY && mouseY < squareY + squareSize) {
-            draggingSquare = true;
-            updateSquare(mouseX, mouseY);
+        if (mouseX >= squareX && mouseX < squareX + size
+                && mouseY >= squareY && mouseY < squareY + size) {
+            draggingShade = false;
+            draggingSpectrum = true;
+            updateSpectrum(mouseX, mouseY);
             return true;
         }
 
         float stripX = stripX();
         float stripWidth = stripWidth();
         if (mouseX >= stripX && mouseX < stripX + stripWidth
-                && mouseY >= squareY && mouseY < squareY + squareSize) {
-            draggingHue = true;
-            updateHue(mouseY);
+                && mouseY >= squareY && mouseY < squareY + size) {
+            draggingSpectrum = false;
+            draggingShade = true;
+            updateShade(mouseY);
             return true;
         }
 
-        return true;
+        return isMouseOver(mouseX, mouseY);
     }
 
     @Override
@@ -160,12 +176,12 @@ public class ColorPicker extends Component {
         if (!open || button != 0) {
             return false;
         }
-        if (draggingSquare) {
-            updateSquare(mouseX, mouseY);
+        if (draggingSpectrum) {
+            updateSpectrum(mouseX, mouseY);
             return true;
         }
-        if (draggingHue) {
-            updateHue(mouseY);
+        if (draggingShade) {
+            updateShade(mouseY);
             return true;
         }
         return false;
@@ -173,22 +189,26 @@ public class ColorPicker extends Component {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        boolean wasDragging = draggingSquare || draggingHue;
-        draggingSquare = false;
-        draggingHue = false;
+        boolean wasDragging = draggingSpectrum || draggingShade;
+        draggingSpectrum = false;
+        draggingShade = false;
         return wasDragging || super.mouseReleased(mouseX, mouseY, button);
     }
 
-    private void updateSquare(double mouseX, double mouseY) {
+    private void updateSpectrum(double mouseX, double mouseY) {
         float size = Math.max(1.0F, squareSize());
-        saturation = MathUtil.clamp((float) ((mouseX - squareX()) / size), 0.0F, 1.0F);
-        brightness = MathUtil.clamp(1.0F - (float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
+        hue = MathUtil.clamp((float) ((mouseX - squareX()) / size), 0.0F, 1.0F);
+        saturation = MathUtil.clamp((float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
+        if (brightness <= 0.0F) {
+            // Picking a hue from black would stay black, which looks broken.
+            brightness = 1.0F;
+        }
         applyHsb();
     }
 
-    private void updateHue(double mouseY) {
+    private void updateShade(double mouseY) {
         float size = Math.max(1.0F, squareSize());
-        hue = MathUtil.clamp((float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
+        brightness = MathUtil.clamp(1.0F - (float) ((mouseY - squareY()) / size), 0.0F, 1.0F);
         applyHsb();
     }
 
@@ -213,7 +233,7 @@ public class ColorPicker extends Component {
     }
 
     private float squareSize() {
-        return Math.min(width() - controlHeight() - 8.0F, 100.0F);
+        return Math.max(1.0F, Math.min(width() - controlHeight() - 8.0F, 140.0F));
     }
 
     private float stripX() {
@@ -221,7 +241,7 @@ public class ColorPicker extends Component {
     }
 
     private float stripWidth() {
-        return controlHeight();
+        return Math.min(controlHeight(), Math.max(8.0F, width() - squareSize() - 8.0F));
     }
 
     @Override
@@ -231,6 +251,9 @@ public class ColorPicker extends Component {
 
     @Override
     public float preferredHeight(GuiContext context) {
-        return open ? 170.0F : context.theme().controlHeight();
+        if (!open) {
+            return context.theme().controlHeight();
+        }
+        return previewSize() + spacing() * 2.0F + squareSize();
     }
 }

@@ -165,6 +165,8 @@ public final class NanoGUICore implements GuiHost {
             Font bold = FontLoader.create(BOLD_FONT_ID, "Inter Bold",
                     FontLoader.INTER_BOLD, FONT_SIZE, java.awt.Font.BOLD, rasterScale);
 
+            LOGGER.info("Bundled font implementation: {} at raster scale {}",
+                    regular.getClass().getSimpleName(), regular.rasterScale());
             gui.fonts().register(regular);
             gui.fonts().register(medium);
             gui.fonts().register(bold);

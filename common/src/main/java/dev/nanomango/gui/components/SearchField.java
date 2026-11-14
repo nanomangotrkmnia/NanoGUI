@@ -42,26 +42,47 @@ public class SearchField extends TextBox {
         return emptyMessage;
     }
 
+    /**
+     * Geometry of the magnifier: {@code x, y, extent, radius}. The box covers
+     * the lens and the handle, so centring it centres what is actually drawn.
+     */
+    float[] iconBounds(GuiContext context) {
+        float size = context.theme().iconSize() * 0.8F;
+        float radius = size * 0.35F;
+        float handle = size * 0.28F;
+        float diagonal = (radius + handle) * 0.7071F;
+        float extent = radius + diagonal;
+        float boxX = x() + padding(context);
+        float boxY = y() + (height() - extent) * 0.5F;
+        return new float[]{boxX, boxY, extent, radius};
+    }
+
     @Override
     protected float leftInset(GuiContext context) {
         // Room for the magnifier so that the placeholder and the text never
-        // start underneath it.
-        float size = context.theme().iconSize() * 0.8F;
-        return size * 0.9F + context.theme().spacing() * 0.5F;
+        // start underneath it. The gap matches the spacing used between the
+        // other elements of a row.
+        float[] icon = iconBounds(context);
+        return icon[2] + context.theme().spacing() * 0.6F;
     }
 
     @Override
     public void render(GuiContext context) {
         super.render(context);
 
-        // Magnifier icon drawn with two primitives: a ring plus a handle.
-        float size = context.theme().iconSize() * 0.8F;
-        float cx = x() + padding(context) + size * 0.4F;
-        float cy = y() + height() * 0.5F - size * 0.15F;
+        // Magnifier icon drawn with two primitives: a ring plus a handle. The
+        // ring sits at the top left of the ink box and the handle runs to the
+        // bottom right, so the box is what gets centred in the field.
+        float[] icon = iconBounds(context);
+        float radius = icon[3];
+        float cx = icon[0] + radius;
+        float cy = icon[1] + radius;
+        float diagonal = icon[2] - radius;
         int iconColor = Colors.withAlphaFactor(context.theme().textMuted(), 0.9F);
-        context.draw().strokeRounded(cx - size * 0.35F, cy - size * 0.35F, size * 0.7F, size * 0.7F,
-                size * 0.35F, 1.0F, iconColor);
-        context.draw().line(cx + size * 0.22F, cy + size * 0.22F, cx + size * 0.5F, cy + size * 0.5F, iconColor);
+        context.draw().strokeRounded(cx - radius, cy - radius, radius * 2.0F, radius * 2.0F,
+                radius, 1.0F, iconColor);
+        context.draw().line(cx + radius * 0.7071F, cy + radius * 0.7071F,
+                cx + diagonal, cy + diagonal, iconColor);
 
         clearSize = context.theme().iconSize() * 0.55F;
         clearX = x() + width() - padding(context) - clearSize;
